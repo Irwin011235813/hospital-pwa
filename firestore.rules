@@ -1,0 +1,30 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helpers
+    function isAuth()    { return request.auth != null; }
+    function uid()       { return request.auth.uid; }
+    function isAdmin()   { return get(/databases/$(database)/documents/users/$(uid())).data.role == 'admin'; }
+    function isOwner(id) { return uid() == id; }
+
+    // Users: owner can read/write; admin can read all
+    match /users/{userId} {
+      allow read:  if isAuth() && (isOwner(userId) || isAdmin());
+      allow write: if isAuth() && (isOwner(userId) || isAdmin());
+    }
+
+    // Appointments: patient reads/creates own; admin reads/updates all
+    match /appointments/{apptId} {
+      allow read:   if isAuth() && (resource.data.patientId == uid() || isAdmin());
+      allow create: if isAuth() && request.resource.data.patientId == uid();
+      allow update: if isAuth() && (resource.data.patientId == uid() || isAdmin());
+    }
+
+    // Medical records: patient reads own; admin reads/writes all
+    match /medical_records/{recordId} {
+      allow read:   if isAuth() && (resource.data.patientId == uid() || isAdmin());
+      allow write:  if isAuth() && isAdmin();
+    }
+  }
+}
