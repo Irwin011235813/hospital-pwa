@@ -1,48 +1,60 @@
 import { useNavigate } from 'react-router-dom'
-import { useAuthContext } from '@/context/AuthContext'
-import { useBooking }     from '@/hooks/useBooking'
-import { PageHeader }     from '@/components/layout/PageHeader'
-import { BottomNav }      from '@/components/layout/BottomNav'
-import { Spinner }        from '@/components/ui/Spinner'
-import { Alert }          from '@/components/ui/Alert'
+import { doc, getDoc } from 'firebase/firestore'
+import { auth, db }    from '@/lib/firebase'
+import { useBooking }  from '@/hooks/useBooking'
+import { BottomNav }   from '@/components/layout/BottomNav'
+import { Spinner }     from '@/components/ui/Spinner'
+import { Alert }       from '@/components/ui/Alert'
 import { CheckCircle2, ChevronRight } from 'lucide-react'
 import { format } from 'date-fns'
 import { es }     from 'date-fns/locale'
 
 export default function BookAppointmentPage() {
-  const { appUser }  = useAuthContext()
-  const navigate     = useNavigate()
-  const booking      = useBooking()
+  const user     = auth.currentUser
+  const navigate = useNavigate()
+  const booking  = useBooking()
 
   const handleConfirm = async () => {
-    if (!appUser) return
-    await booking.confirm(appUser.uid, appUser.displayName, appUser.dni)
+    if (!user) return
+    try {
+      const snap = await getDoc(doc(db, 'users', user.uid))
+      const dni  = snap.exists() ? (snap.data().dni ?? '') : ''
+      await booking.confirm(
+        user.uid,
+        user.displayName ?? 'Paciente',
+        dni
+      )
+    } catch (err) {
+      console.error(err)
+    }
   }
 
-  const stepLabel = booking.step === 'specialty' ? 'Paso 1 de 3 — Especialidad'
-    : booking.step === 'doctor'    ? 'Paso 2 de 3 — Médico'
-    : booking.step === 'slot'      ? 'Paso 3 de 3 — Fecha y horario'
-    : 'Turno solicitado'
+  const stepLabel =
+    booking.step === 'specialty' ? 'Paso 1 de 3 — Especialidad' :
+    booking.step === 'doctor'    ? 'Paso 2 de 3 — Medico' :
+    booking.step === 'slot'      ? 'Paso 3 de 3 — Fecha y horario' :
+    'Turno solicitado'
 
+  // ── Confirmado ──────────────────────────────────────────────────────────────
   if (booking.step === 'done') {
     return (
-      <div className="min-h-screen bg-slate-25 flex flex-col items-center justify-center px-6 text-center">
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-6 text-center">
         <CheckCircle2 size={64} className="text-emerald-500 mb-5" strokeWidth={1.5} />
-        <h1 className="font-bold text-2xl text-slate-900 mb-2">¡Turno confirmado!</h1>
+        <h1 className="font-bold text-2xl text-slate-900 mb-2">Turno confirmado</h1>
         <p className="text-slate-500 text-sm mb-6">Tu turno fue registrado correctamente.</p>
 
         {booking.date && booking.slot && (
           <div className="card w-full max-w-sm text-left mb-6 space-y-2">
             <Row label="Especialidad" value={booking.specialty?.label ?? ''} />
-            <Row label="Médico/a"     value={booking.doctor?.name ?? ''} />
+            <Row label="Medico/a"     value={booking.doctor?.name ?? ''} />
             <Row label="Fecha"        value={format(booking.date, "EEEE d 'de' MMMM", { locale: es })} />
             <Row label="Hora"         value={`${booking.slot} hs`} />
           </div>
         )}
 
         <div className="flex gap-3 w-full max-w-sm">
-          <button onClick={() => { booking.reset(); }} className="btn-secondary flex-1">Nuevo turno</button>
-          <button onClick={() => navigate('/patient')}  className="btn-primary flex-1">Volver al inicio</button>
+          <button onClick={() => booking.reset()}              className="btn-secondary flex-1">Nuevo turno</button>
+          <button onClick={() => navigate('/patient')}         className="btn-primary flex-1">Volver al inicio</button>
         </div>
       </div>
     )
@@ -50,28 +62,41 @@ export default function BookAppointmentPage() {
 
   return (
     <div className="page-root">
-      {/* Progress */}
+      {/* Barra de progreso */}
       <div className="fixed top-0 inset-x-0 z-50 h-1 bg-slate-100">
         <div
-          className="h-full bg-brand-700 transition-all duration-500 ease-out"
+          className="h-full bg-blue-700 transition-all duration-500"
           style={{ width: booking.step === 'specialty' ? '33%' : booking.step === 'doctor' ? '66%' : '100%' }}
         />
       </div>
 
-      <PageHeader
-        title="Solicitar Turno"
-        subtitle={stepLabel}
-        back={booking.step !== 'specialty'}
-        backTo={booking.step === 'specialty' ? '/patient' : undefined}
-      />
+      {/* Header */}
+      <header className="page-header mt-1">
+        <div className="max-w-2xl mx-auto flex items-center gap-3">
+          {booking.step !== 'specialty' && (
+            <button onClick={booking.back} className="btn-ghost btn-icon -ml-1">
+              <ChevronRight size={20} className="rotate-180" />
+            </button>
+          )}
+          {booking.step === 'specialty' && (
+            <button onClick={() => navigate('/patient')} className="btn-ghost btn-icon -ml-1">
+              <ChevronRight size={20} className="rotate-180" />
+            </button>
+          )}
+          <div>
+            <p className="font-semibold text-slate-900 text-base">Solicitar Turno</p>
+            <p className="text-xs text-slate-400">{stepLabel}</p>
+          </div>
+        </div>
+      </header>
 
       <div className="page-content">
         {booking.error && <div className="mb-4"><Alert message={booking.error} /></div>}
 
-        {/* ── Step 1: Specialty ── */}
+        {/* ── Paso 1: Especialidad ── */}
         {booking.step === 'specialty' && (
           <div className="space-y-2 stagger">
-            <p className="section-title">Seleccioná la especialidad</p>
+            <p className="section-title">Selecciona la especialidad</p>
             {booking.specialties.map(s => (
               <button
                 key={s.id}
@@ -80,32 +105,8 @@ export default function BookAppointmentPage() {
               >
                 <div className="text-left">
                   <p className="font-semibold text-slate-900 text-sm">{s.label}</p>
-                  <p className="text-slate-400 text-xs mt-0.5">{s.doctors.length} médico{s.doctors.length > 1 ? 's' : ''}</p>
-                </div>
-                <ChevronRight size={18} className="text-slate-300 shrink-0" />
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* ── Step 2: Doctor ── */}
-        {booking.step === 'doctor' && booking.specialty && (
-          <div className="space-y-2 stagger">
-            <p className="section-title">Seleccioná el/la médico/a</p>
-            <div className="card mb-4 flex items-center gap-2">
-              <span className="text-xs text-slate-500">Especialidad:</span>
-              <span className="font-semibold text-sm text-brand-800">{booking.specialty.label}</span>
-            </div>
-            {booking.specialty.doctors.map(d => (
-              <button
-                key={d.id}
-                onClick={() => booking.selectDoctor(d.id)}
-                className="card-hover w-full flex items-center justify-between gap-3"
-              >
-                <div className="text-left">
-                  <p className="font-semibold text-slate-900 text-sm">{d.name}</p>
                   <p className="text-slate-400 text-xs mt-0.5">
-                    Atiende {d.availableDays.length} días a la semana
+                    {s.doctors.length} medico{s.doctors.length > 1 ? 's' : ''}
                   </p>
                 </div>
                 <ChevronRight size={18} className="text-slate-300 shrink-0" />
@@ -114,13 +115,47 @@ export default function BookAppointmentPage() {
           </div>
         )}
 
-        {/* ── Step 3: Date + Slot ── */}
+        {/* ── Paso 2: Medico ── */}
+        {booking.step === 'doctor' && booking.specialty && (
+          <div className="space-y-2 stagger">
+            <p className="section-title">Selecciona el/la medico/a</p>
+            <div className="card mb-4 flex items-center gap-2">
+              <span className="text-xs text-slate-500">Especialidad:</span>
+              <span className="font-semibold text-sm text-blue-800">{booking.specialty.label}</span>
+            </div>
+            {booking.specialty.doctors.map(d => (
+              <button
+                key={d.id}
+                onClick={() => booking.selectDoctor(d.id)}
+                className="card-hover w-full flex items-center justify-between gap-3"
+              >
+                <div className="flex items-center gap-3 text-left">
+                  <div className="w-10 h-10 rounded-xl bg-blue-800 flex items-center justify-center shrink-0">
+                    <span className="text-white font-bold text-sm">
+                      {d.name.replace('Dr. ','').replace('Dra. ','').charAt(0)}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-900 text-sm">{d.name}</p>
+                    <p className="text-slate-400 text-xs mt-0.5">
+                      {d.availableDays.length} dias por semana
+                    </p>
+                  </div>
+                </div>
+                <ChevronRight size={18} className="text-slate-300 shrink-0" />
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* ── Paso 3: Fecha y horario ── */}
         {booking.step === 'slot' && booking.doctor && (
           <div>
+            {/* Medico seleccionado */}
             <div className="card mb-5 flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-brand-800 flex items-center justify-center shrink-0">
-                <span className="text-white text-xs font-bold">
-                  {booking.doctor.name.split(' ').filter(w => !['Dr.','Dra.'].includes(w))[0]?.charAt(0)}
+              <div className="w-10 h-10 rounded-xl bg-blue-800 flex items-center justify-center shrink-0">
+                <span className="text-white font-bold text-sm">
+                  {booking.doctor.name.replace('Dr. ','').replace('Dra. ','').charAt(0)}
                 </span>
               </div>
               <div>
@@ -129,7 +164,8 @@ export default function BookAppointmentPage() {
               </div>
             </div>
 
-            <p className="section-title">Elegí el día</p>
+            {/* Selector de fecha */}
+            <p className="section-title">Elegi el dia</p>
             <div className="flex gap-2 overflow-x-auto pb-3 -mx-1 px-1 mb-5">
               {booking.availableDates.map(d => {
                 const sel = booking.date?.toDateString() === d.toDateString()
@@ -137,8 +173,11 @@ export default function BookAppointmentPage() {
                   <button
                     key={d.toISOString()}
                     onClick={() => { booking.setDate(d); booking.setSlot(null) }}
-                    className={`flex flex-col items-center min-w-[58px] py-3 rounded-xl border-2 transition-all duration-150 active:scale-[.97]
-                      ${sel ? 'bg-brand-800 border-brand-800 text-white' : 'bg-white border-slate-200 text-slate-700 hover:border-brand-300'}`}
+                    className={`flex flex-col items-center min-w-[58px] py-3 rounded-xl border-2 transition-all active:scale-[.97]
+                      ${sel
+                        ? 'bg-blue-800 border-blue-800 text-white'
+                        : 'bg-white border-slate-200 text-slate-700 hover:border-blue-300'
+                      }`}
                   >
                     <span className="text-[10px] font-medium capitalize opacity-70">
                       {format(d, 'EEE', { locale: es })}
@@ -152,9 +191,10 @@ export default function BookAppointmentPage() {
               })}
             </div>
 
+            {/* Selector de horario */}
             {booking.date && (
               <>
-                <p className="section-title">Elegí el horario</p>
+                <p className="section-title">Elegi el horario</p>
                 <div className="grid grid-cols-4 gap-2 mb-6">
                   {booking.doctor.slots.map(s => {
                     const sel = booking.slot === s
@@ -162,8 +202,11 @@ export default function BookAppointmentPage() {
                       <button
                         key={s}
                         onClick={() => booking.setSlot(s)}
-                        className={`py-3 rounded-xl border-2 text-sm font-semibold transition-all duration-150 active:scale-[.97]
-                          ${sel ? 'bg-brand-800 border-brand-800 text-white' : 'bg-white border-slate-200 text-slate-700 hover:border-brand-300'}`}
+                        className={`py-3 rounded-xl border-2 text-sm font-semibold transition-all active:scale-[.97]
+                          ${sel
+                            ? 'bg-blue-800 border-blue-800 text-white'
+                            : 'bg-white border-slate-200 text-slate-700 hover:border-blue-300'
+                          }`}
                       >
                         {s}
                       </button>
@@ -173,14 +216,19 @@ export default function BookAppointmentPage() {
               </>
             )}
 
+            {/* Confirmar */}
             {booking.date && booking.slot && (
               <div className="animate-fade-up space-y-3">
-                <div className="card bg-brand-50 border-brand-200">
-                  <p className="text-brand-800 text-sm font-semibold text-center">
+                <div className="card bg-blue-50 border-blue-200">
+                  <p className="text-blue-800 text-sm font-semibold text-center">
                     {format(booking.date, "EEEE d 'de' MMMM", { locale: es })} — {booking.slot} hs
                   </p>
                 </div>
-                <button onClick={handleConfirm} disabled={booking.loading} className="btn-primary btn-lg w-full">
+                <button
+                  onClick={handleConfirm}
+                  disabled={booking.loading}
+                  className="btn-primary btn-lg w-full"
+                >
                   {booking.loading && <Spinner size={18} />}
                   {booking.loading ? 'Guardando...' : 'Confirmar turno'}
                 </button>
