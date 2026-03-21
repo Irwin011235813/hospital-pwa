@@ -192,29 +192,40 @@ export default function BookAppointmentPage() {
             </div>
 
             {/* Selector de horario */}
-            {booking.date && (
-              <>
-                <p className="section-title">Elegi el horario</p>
-                <div className="grid grid-cols-4 gap-2 mb-6">
-                  {booking.doctor.slots.map(s => {
-                    const sel = booking.slot === s
-                    return (
-                      <button
-                        key={s}
-                        onClick={() => booking.setSlot(s)}
-                        className={`py-3 rounded-xl border-2 text-sm font-semibold transition-all active:scale-[.97]
-                          ${sel
-                            ? 'bg-blue-800 border-blue-800 text-white'
-                            : 'bg-white border-slate-200 text-slate-700 hover:border-blue-300'
-                          }`}
-                      >
-                        {s}
-                      </button>
-                    )
-                  })}
-                </div>
-              </>
-            )}
+{booking.date && (
+  <>
+    <p className="section-title">Elegi el horario</p>
+
+    {booking.loadingSlots ? (
+      <div className="flex justify-center py-4">
+        <Spinner size={20} />
+      </div>
+    ) : (
+      <div className="grid grid-cols-4 gap-2 mb-6">
+        {booking.slots.map(({ time, isOccupied }) => {
+          const isSel = booking.slot === time
+          return (
+            <button
+              key={time}
+              onClick={() => !isOccupied && booking.setSlot(time)}
+              disabled={isOccupied}
+              title={isOccupied ? 'Horario ocupado' : ''}
+              className={`py-3 rounded-xl border-2 text-sm font-semibold transition-all
+                ${isOccupied
+                  ? 'bg-slate-50 border-slate-100 text-slate-300 opacity-40 cursor-not-allowed line-through'
+                  : isSel
+                    ? 'bg-blue-800 border-blue-800 text-white'
+                    : 'bg-white border-slate-200 text-slate-700 hover:border-blue-300 active:scale-[.97]'
+                }`}
+            >
+              {time}
+            </button>
+          )
+        })}
+      </div>
+    )}
+  </>
+)}
 
             {/* Confirmar */}
             {booking.date && booking.slot && (
