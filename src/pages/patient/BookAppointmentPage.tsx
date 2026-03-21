@@ -197,25 +197,31 @@ export default function BookAppointmentPage() {
     <p className="section-title">Elegi el horario</p>
 
     {booking.loadingSlots ? (
-      <div className="flex justify-center py-4">
+      <div className="flex justify-center py-6">
         <Spinner size={20} />
+      </div>
+    ) : booking.availableSlots.length === 0 ? (
+      <div className="card text-center py-6 mb-6">
+        <p className="text-slate-500 text-sm font-medium">
+          No hay horarios disponibles para este dia.
+        </p>
+        <p className="text-slate-400 text-xs mt-1">
+          Proba con otra fecha u otro medico.
+        </p>
       </div>
     ) : (
       <div className="grid grid-cols-4 gap-2 mb-6">
-        {booking.slots.map(({ time, isOccupied }) => {
+        {booking.availableSlots.map(time => {
           const isSel = booking.slot === time
           return (
             <button
               key={time}
-              onClick={() => !isOccupied && booking.setSlot(time)}
-              disabled={isOccupied}
-              title={isOccupied ? 'Horario ocupado' : ''}
-              className={`py-3 rounded-xl border-2 text-sm font-semibold transition-all
-                ${isOccupied
-                  ? 'bg-slate-50 border-slate-100 text-slate-300 opacity-40 cursor-not-allowed line-through'
-                  : isSel
-                    ? 'bg-blue-800 border-blue-800 text-white'
-                    : 'bg-white border-slate-200 text-slate-700 hover:border-blue-300 active:scale-[.97]'
+              onClick={() => booking.setSlot(time)}
+              className={`py-3 rounded-xl border-2 text-sm font-semibold
+                          transition-all active:scale-[.97]
+                ${isSel
+                  ? 'bg-blue-800 border-blue-800 text-white'
+                  : 'bg-white border-slate-200 text-slate-700 hover:border-blue-300'
                 }`}
             >
               {time}
