@@ -191,7 +191,7 @@ export default function BookAppointmentPage() {
               })}
             </div>
 
-            {/* Selector de horario */}
+           {/* Selector de horario */}
 {booking.date && (
   <>
     <p className="section-title">Elegi el horario</p>
@@ -200,15 +200,17 @@ export default function BookAppointmentPage() {
       <div className="flex justify-center py-6">
         <Spinner size={20} />
       </div>
+
     ) : booking.availableSlots.length === 0 ? (
-      <div className="card text-center py-6 mb-6">
-        <p className="text-slate-500 text-sm font-medium">
-          No hay horarios disponibles para este dia.
+      <div className="card border-amber-200 bg-amber-50 text-center py-6 mb-6">
+        <p className="text-amber-700 font-semibold text-sm">
+          Sin turnos disponibles
         </p>
-        <p className="text-slate-400 text-xs mt-1">
-          Proba con otra fecha u otro medico.
+        <p className="text-amber-600 text-xs mt-1">
+          No quedan horarios para este dia. Proba con otra fecha u otro medico.
         </p>
       </div>
+
     ) : (
       <div className="grid grid-cols-4 gap-2 mb-6">
         {booking.availableSlots.map(time => {

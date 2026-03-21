@@ -34,17 +34,13 @@ export function useBooking() {
   const [loading,   setLoading]   = useState(false)
   const [error,     setError]     = useState<string | null>(null)
 
-  // Slots disponibles (ya filtrados — sin los ocupados)
   const [availableSlots, setAvailableSlots] = useState<string[]>([])
   const [loadingSlots,   setLoadingSlots]   = useState(false)
 
   const specialties    = SPECIALTIES
   const availableDates = doctor ? nextAvailableDates(doctor.availableDays) : []
 
-  // ── Suscripción reactiva en tiempo real ───────────────────────────────────
-  // Se ejecuta cada vez que cambia el médico o la fecha.
-  // onSnapshot garantiza que si alguien reserva un turno mientras el usuario
-  // está eligiendo, el horario desaparece inmediatamente.
+  // ── Suscripción reactiva: slots libres en tiempo real ─────────────────────
   useEffect(() => {
     if (!doctor || !date) {
       setAvailableSlots(doctor?.slots ?? [])
@@ -52,13 +48,12 @@ export function useBooking() {
     }
 
     setLoadingSlots(true)
-    setSlot(null) // resetear slot elegido si cambia la fecha
+    setSlot(null)
 
-    const dayStr   = format(date, 'yyyy-MM-dd')           // '2025-03-24'
+    const dayStr   = format(date, 'yyyy-MM-dd')
     const dayStart = `${dayStr}T00:00:00.000Z`
     const dayEnd   = `${dayStr}T23:59:59.999Z`
 
-    // Query: turnos del mismo médico en ese día que estén pendientes o confirmados
     const q = query(
       collection(db, 'appointments'),
       where('doctorId', '==', doctor.id),
@@ -67,32 +62,27 @@ export function useBooking() {
       where('status',   'in', ['pending', 'confirmed']),
     )
 
-    // onSnapshot → reactivo en tiempo real
     const unsub = onSnapshot(
       q,
       (snap) => {
-        // Extraemos los HH:mm de cada turno ocupado
+        // Horarios ya ocupados
         const occupiedSet = new Set<string>()
         snap.docs.forEach(d => {
-          const iso  = d.data().dateTime as string // '2025-03-24T08:30:00.000Z'
-          const time = iso.slice(11, 16)           // '08:30'
+          const time = (d.data().dateTime as string).slice(11, 16)
           occupiedSet.add(time)
         })
-
-        // Filtramos: solo incluimos los slots que NO están ocupados
+        // Solo los libres
         const free = doctor.slots.filter(t => !occupiedSet.has(t))
         setAvailableSlots(free)
         setLoadingSlots(false)
       },
       (err) => {
-        console.error('[useBooking] onSnapshot error:', err)
-        // Si falla mostramos todos para no bloquear al usuario
+        console.error('[useBooking] onSnapshot:', err)
         setAvailableSlots(doctor.slots)
         setLoadingSlots(false)
       }
     )
 
-    // Cleanup: cancelar suscripción al cambiar médico/fecha o desmontar
     return () => unsub()
   }, [doctor, date])
 
@@ -115,9 +105,7 @@ export function useBooking() {
   }
 
   const handleSetDate = (d: Date) => {
-    setDate(d)
-    setSlot(null)
-    setError(null)
+    setDate(d); setSlot(null); setError(null)
   }
 
   const back = () => {
@@ -132,7 +120,7 @@ export function useBooking() {
     }
   }
 
-  // ── Confirmar turno ───────────────────────────────────────────────────────
+  // ── Confirmar ─────────────────────────────────────────────────────────────
 
   const confirm = async (
     patientId:   string,
@@ -140,61 +128,53 @@ export function useBooking() {
     patientDni:  string,
   ): Promise<boolean> => {
     if (!specialty || !doctor || !date || !slot) return false
-
-    setLoading(true)
-    setError(null)
+    setLoading(true); setError(null)
 
     try {
       const [hh, mm] = slot.split(':').map(Number)
       const dt       = setMinutes(setHours(new Date(date), hh), mm)
       const isoDate  = dt.toISOString()
 
-      // Doble verificación antes de grabar (por si acaso)
-      const dupSnap = await getDocs(query(
+      // Verificar que el slot sigue libre (race condition)
+      const dupDoctor = await getDocs(query(
         collection(db, 'appointments'),
         where('doctorId', '==', doctor.id),
         where('dateTime', '==', isoDate),
         where('status',   'in', ['pending', 'confirmed']),
       ))
-
-      if (!dupSnap.empty) {
-        setError('Este horario acaba de ser reservado. Por favor elegí otro.')
+      if (!dupDoctor.empty) {
+        setError('Este horario acaba de ser reservado. Elegi otro.')
         return false
       }
 
       // Verificar que el paciente no tenga otro turno al mismo horario
-      const patientDupSnap = await getDocs(query(
+      const dupPatient = await getDocs(query(
         collection(db, 'appointments'),
         where('patientId', '==', patientId),
         where('dateTime',  '==', isoDate),
         where('status',    'in', ['pending', 'confirmed']),
       ))
-
-      if (!patientDupSnap.empty) {
+      if (!dupPatient.empty) {
         setError('Ya tenes un turno agendado para este horario.')
         return false
       }
 
-      // Guardar en Firestore
       const ref = await addDoc(collection(db, 'appointments'), {
-        patientId,
-        patientName,
-        patientDni,
-        doctorId:   doctor.id,
+        patientId, patientName, patientDni,
+        doctorId:  doctor.id,
         doctorName: doctor.name,
         specialty:  specialty.label,
         dateTime:   isoDate,
         status:     'pending',
         createdAt:  new Date().toISOString(),
       })
-
       await updateDoc(doc(db, 'appointments', ref.id), { id: ref.id })
 
       setStep('done')
       return true
 
     } catch (err) {
-      console.error('[useBooking.confirm]', err)
+      console.error('[confirm]', err)
       setError('No se pudo guardar el turno. Intenta de nuevo.')
       return false
     } finally {
