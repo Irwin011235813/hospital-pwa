@@ -40,7 +40,7 @@ export function useBooking() {
   const specialties    = SPECIALTIES
   const availableDates = doctor ? nextAvailableDates(doctor.availableDays) : []
 
-  // ── Suscripción reactiva: slots libres en tiempo real ─────────────────────
+  // ── Slots libres en tiempo real ───────────────────────────────────────────
   useEffect(() => {
     if (!doctor || !date) {
       setAvailableSlots(doctor?.slots ?? [])
@@ -50,28 +50,35 @@ export function useBooking() {
     setLoadingSlots(true)
     setSlot(null)
 
-    const dayStr   = format(date, 'yyyy-MM-dd')
-    const dayStart = `${dayStr}T00:00:00.000Z`
-    const dayEnd   = `${dayStr}T23:59:59.999Z`
+    const dayStr = format(date, 'yyyy-MM-dd')
 
+    // Usamos índice existente: doctorId + status
+    // El filtro por día lo hacemos en JS para no necesitar índice nuevo
     const q = query(
       collection(db, 'appointments'),
       where('doctorId', '==', doctor.id),
-      where('dateTime', '>=', dayStart),
-      where('dateTime', '<=', dayEnd),
       where('status',   'in', ['pending', 'confirmed']),
     )
 
     const unsub = onSnapshot(
       q,
       (snap) => {
-        // Horarios ya ocupados
         const occupiedSet = new Set<string>()
+
         snap.docs.forEach(d => {
-          const time = (d.data().dateTime as string).slice(11, 16)
-          occupiedSet.add(time)
+          const data     = d.data()
+          const apptDay  = (data.dateTime as string).slice(0, 10)
+
+          // Solo los del mismo día
+          if (apptDay === dayStr) {
+            const dt = new Date(data.dateTime)
+            const hh = String(dt.getHours()).padStart(2, '0')
+            const mm = String(dt.getMinutes()).padStart(2, '0')
+            occupiedSet.add(`${hh}:${mm}`)
+          }
         })
-        // Solo los libres
+
+        // Solo mostramos los slots libres
         const free = doctor.slots.filter(t => !occupiedSet.has(t))
         setAvailableSlots(free)
         setLoadingSlots(false)
@@ -116,11 +123,12 @@ export function useBooking() {
     }
     if (step === 'slot') {
       setStep('doctor')
-      setDoctor(null); setDate(null); setSlot(null); setAvailableSlots([])
+      setDoctor(null); setDate(null)
+      setSlot(null); setAvailableSlots([])
     }
   }
 
-  // ── Confirmar ─────────────────────────────────────────────────────────────
+  // ── Confirmar turno ───────────────────────────────────────────────────────
 
   const confirm = async (
     patientId:   string,
@@ -134,8 +142,9 @@ export function useBooking() {
       const [hh, mm] = slot.split(':').map(Number)
       const dt       = setMinutes(setHours(new Date(date), hh), mm)
       const isoDate  = dt.toISOString()
+      const dayStr   = format(dt, 'yyyy-MM-dd')
 
-      // Verificar que el slot sigue libre (race condition)
+      // 1. Verificar que el slot del médico sigue libre
       const dupDoctor = await getDocs(query(
         collection(db, 'appointments'),
         where('doctorId', '==', doctor.id),
@@ -147,21 +156,25 @@ export function useBooking() {
         return false
       }
 
-      // Verificar que el paciente no tenga otro turno al mismo horario
+      // 2. Verificar que el paciente no tenga turno ese mismo día
       const dupPatient = await getDocs(query(
         collection(db, 'appointments'),
         where('patientId', '==', patientId),
-        where('dateTime',  '==', isoDate),
+        where('dateTime',  '>=', `${dayStr}T00:00:00.000Z`),
+        where('dateTime',  '<=', `${dayStr}T23:59:59.999Z`),
         where('status',    'in', ['pending', 'confirmed']),
       ))
       if (!dupPatient.empty) {
-        setError('Ya tenes un turno agendado para este horario.')
+        setError('Ya tenes un turno agendado para este dia. Solo se permite 1 turno por dia.')
         return false
       }
 
+      // 3. Guardar turno
       const ref = await addDoc(collection(db, 'appointments'), {
-        patientId, patientName, patientDni,
-        doctorId:  doctor.id,
+        patientId,
+        patientName,
+        patientDni,
+        doctorId:   doctor.id,
         doctorName: doctor.name,
         specialty:  specialty.label,
         dateTime:   isoDate,
