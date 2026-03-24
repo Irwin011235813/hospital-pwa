@@ -82,8 +82,8 @@ function ManualModal({ onClose }: ManualModalProps) {
     }
     setSaving(true)
     try {
-      const [hh, mm]  = form.slot.split(':').map(Number)
-      const dt        = new Date(form.date)
+      const [hh, mm] = form.slot.split(':').map(Number)
+      const dt       = new Date(form.date)
       dt.setHours(hh, mm, 0, 0)
 
       await addDoc(collection(db, 'appointments'), {
@@ -110,27 +110,52 @@ function ManualModal({ onClose }: ManualModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-      <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="font-bold text-lg text-slate-900">Registrar Turno Manual</h2>
-          <button onClick={onClose} className="btn-ghost btn-icon"><X size={18} /></button>
+    // ── Overlay ──────────────────────────────────────────────────────────────
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center
+                    bg-black/50 backdrop-blur-sm px-0 sm:px-4">
+
+      {/* Contenedor del modal — flex column con altura máxima */}
+      <div className="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl shadow-2xl
+                      flex flex-col max-h-[90vh]">
+
+        {/* ── HEADER — siempre visible, no scrollea ── */}
+        <div className="flex items-center justify-between px-6 py-4
+                        border-b border-slate-100 shrink-0">
+          <div>
+            <h2 className="font-bold text-base text-slate-900">Registrar Turno Manual</h2>
+            <p className="text-xs text-slate-400 mt-0.5">Paciente sin acceso a la app</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center
+                       hover:bg-slate-200 transition-colors"
+          >
+            <X size={16} className="text-slate-600" />
+          </button>
         </div>
 
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
-            {error}
-          </div>
-        )}
+        {/* ── BODY — scrolleable ── */}
+        <div className="overflow-y-auto flex-1 px-6 py-4 space-y-4">
 
-        <div className="space-y-4">
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-xl
+                            text-red-700 text-sm font-medium flex items-center gap-2">
+              <X size={14} className="shrink-0" />
+              {error}
+            </div>
+          )}
+
           {/* Nombre */}
           <div>
-            <label className="label">Nombre del paciente *</label>
+            <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
+              Nombre completo <span className="text-red-500">*</span>
+            </label>
             <div className="relative">
-              <User size={16} className="absolute left-3 top-3.5 text-slate-400" />
+              <User size={15} className="absolute left-3 top-3 text-slate-400" />
               <input
-                className="input pl-9"
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm
+                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                           transition-all placeholder:text-slate-400"
                 placeholder="Apellido y Nombre"
                 value={form.patientName}
                 onChange={e => setForm(f => ({ ...f, patientName: e.target.value }))}
@@ -138,43 +163,55 @@ function ManualModal({ onClose }: ManualModalProps) {
             </div>
           </div>
 
-          {/* DNI */}
-          <div>
-            <label className="label">DNI *</label>
-            <input
-              className="input font-mono"
-              placeholder="Sin puntos"
-              inputMode="numeric"
-              maxLength={9}
-              value={form.dni}
-              onChange={e => {
-                if (/^\d*$/.test(e.target.value))
-                  setForm(f => ({ ...f, dni: e.target.value }))
-              }}
-            />
-          </div>
-
-          {/* Telefono */}
-          <div>
-            <label className="label">Telefono</label>
-            <div className="relative">
-              <Phone size={16} className="absolute left-3 top-3.5 text-slate-400" />
+          {/* DNI y Telefono — en fila */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
+                DNI <span className="text-red-500">*</span>
+              </label>
               <input
-                className="input pl-9"
-                placeholder="Ej: 3764123456"
+                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm
+                           font-mono focus:outline-none focus:ring-2 focus:ring-blue-500
+                           focus:border-transparent transition-all placeholder:text-slate-400"
+                placeholder="33812282"
                 inputMode="numeric"
-                value={form.phone}
-                onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
+                maxLength={9}
+                value={form.dni}
+                onChange={e => {
+                  if (/^\d*$/.test(e.target.value))
+                    setForm(f => ({ ...f, dni: e.target.value }))
+                }}
               />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
+                Telefono
+              </label>
+              <div className="relative">
+                <Phone size={15} className="absolute left-3 top-3 text-slate-400" />
+                <input
+                  className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-sm
+                             focus:outline-none focus:ring-2 focus:ring-blue-500
+                             focus:border-transparent transition-all placeholder:text-slate-400"
+                  placeholder="3764..."
+                  inputMode="numeric"
+                  value={form.phone}
+                  onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
+                />
+              </div>
             </div>
           </div>
 
           {/* Fecha */}
           <div>
-            <label className="label">Fecha *</label>
+            <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
+              Fecha <span className="text-red-500">*</span>
+            </label>
             <input
               type="date"
-              className="input"
+              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm
+                         focus:outline-none focus:ring-2 focus:ring-blue-500
+                         focus:border-transparent transition-all"
               value={form.date}
               min={format(new Date(), 'yyyy-MM-dd')}
               onChange={e => setForm(f => ({ ...f, date: e.target.value, slot: '' }))}
@@ -183,13 +220,19 @@ function ManualModal({ onClose }: ManualModalProps) {
 
           {/* Especialidad */}
           <div>
-            <label className="label">Especialidad *</label>
+            <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
+              Especialidad <span className="text-red-500">*</span>
+            </label>
             <select
-              className="input"
+              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm
+                         focus:outline-none focus:ring-2 focus:ring-blue-500
+                         focus:border-transparent transition-all bg-white"
               value={form.specialtyId}
-              onChange={e => setForm(f => ({ ...f, specialtyId: e.target.value, doctorId: '', slot: '' }))}
+              onChange={e => setForm(f => ({
+                ...f, specialtyId: e.target.value, doctorId: '', slot: ''
+              }))}
             >
-              <option value="">Seleccionar...</option>
+              <option value="">Seleccionar especialidad...</option>
               {SPECIALTIES.map(s => (
                 <option key={s.id} value={s.id}>{s.label}</option>
               ))}
@@ -199,13 +242,17 @@ function ManualModal({ onClose }: ManualModalProps) {
           {/* Medico */}
           {specialty && (
             <div>
-              <label className="label">Medico *</label>
+              <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
+                Medico <span className="text-red-500">*</span>
+              </label>
               <select
-                className="input"
+                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm
+                           focus:outline-none focus:ring-2 focus:ring-blue-500
+                           focus:border-transparent transition-all bg-white"
                 value={form.doctorId}
                 onChange={e => setForm(f => ({ ...f, doctorId: e.target.value, slot: '' }))}
               >
-                <option value="">Seleccionar...</option>
+                <option value="">Seleccionar medico...</option>
                 {specialty.doctors.map(d => (
                   <option key={d.id} value={d.id}>{d.name}</option>
                 ))}
@@ -213,36 +260,81 @@ function ManualModal({ onClose }: ManualModalProps) {
             </div>
           )}
 
-          {/* Horario */}
+          {/* Horarios — grid 4 columnas para ocupar menos espacio */}
           {doctor && (
             <div>
-              <label className="label">Horario *</label>
+              <label className="block text-xs font-semibold text-slate-600 mb-2 uppercase tracking-wide">
+                Horario <span className="text-red-500">*</span>
+              </label>
               <div className="grid grid-cols-4 gap-2">
-                {doctor.slots.map(s => (
-                  <button
-                    key={s}
-                    onClick={() => setForm(f => ({ ...f, slot: s }))}
-                    className={`py-2 rounded-xl border-2 text-sm font-semibold transition-all
-                      ${form.slot === s
-                        ? 'bg-blue-800 border-blue-800 text-white'
-                        : 'bg-white border-slate-200 text-slate-700 hover:border-blue-300'
-                      }`}
-                  >
-                    {s}
-                  </button>
-                ))}
+                {doctor.slots.map(s => {
+                  const isSel = form.slot === s
+                  return (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setForm(f => ({ ...f, slot: s }))}
+                      className={`py-2.5 rounded-xl border-2 text-xs font-bold
+                                  transition-all duration-150 active:scale-95
+                        ${isSel
+                          ? 'bg-blue-800 border-blue-800 text-white shadow-md'
+                          : 'bg-white border-slate-200 text-slate-700 hover:border-blue-400 hover:text-blue-700'
+                        }`}
+                    >
+                      {s}
+                    </button>
+                  )
+                })}
               </div>
+              {form.slot && (
+                <p className="text-xs text-blue-700 font-semibold mt-2 text-center">
+                  Horario seleccionado: {form.slot} hs
+                </p>
+              )}
             </div>
           )}
+
+          {/* Spacer para que el ultimo campo no quede pegado al footer */}
+          <div className="h-2" />
         </div>
 
-        <div className="flex gap-3 mt-6">
-          <button onClick={onClose}    className="btn-secondary flex-1">Cancelar</button>
-          <button onClick={handleSave} disabled={saving} className="btn-primary flex-1">
-            {saving ? <Spinner size={16} /> : <Plus size={16} />}
-            {saving ? 'Guardando...' : 'Guardar turno'}
-          </button>
+        {/* ── FOOTER — siempre visible, fuera del scroll ── */}
+        <div className="px-6 py-4 border-t border-slate-100 bg-white shrink-0
+                        rounded-b-2xl space-y-2">
+
+          {/* Resumen del turno si esta completo */}
+          {form.patientName && form.slot && doctor && (
+            <div className="p-3 bg-blue-50 rounded-xl border border-blue-100 mb-2">
+              <p className="text-xs text-blue-700 font-semibold text-center">
+                {form.patientName} · {doctor.name} · {form.slot} hs
+              </p>
+            </div>
+          )}
+
+          <div className="flex gap-3">
+            <button
+              onClick={onClose}
+              className="flex-1 py-3 rounded-xl border-2 border-slate-200 text-sm
+                         font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={saving || !form.patientName || !form.dni || !form.slot}
+              className="flex-2 flex-[2] py-3 rounded-xl bg-blue-800 text-white text-sm
+                         font-semibold flex items-center justify-center gap-2
+                         disabled:opacity-40 hover:bg-blue-900 transition-colors
+                         active:scale-[.98]"
+            >
+              {saving
+                ? <><Spinner size={16} /> Guardando...</>
+                : <><Plus size={16} /> Guardar turno</>
+              }
+            </button>
+          </div>
         </div>
+
       </div>
     </div>
   )
