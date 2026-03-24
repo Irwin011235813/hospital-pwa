@@ -1,58 +1,71 @@
-// ── Domain Models ─────────────────────────────────────────────────────────
-
-export type UserRole = 'patient' | 'admin';
+export type UserRole = 'patient' | 'admin'
 
 export interface AppUser {
-  uid: string;
-  email: string;
-  displayName: string;
-  dni: string;
-  role: UserRole;
-  createdAt: string;
-  photoURL?: string;
+  uid:         string
+  email:       string
+  displayName: string
+  dni:         string
+  role:        UserRole
+  createdAt:   string
+  photoURL?:   string
 }
 
-export type AppointmentStatus = 'pending' | 'completed' | 'cancelled';
+export type AppointmentStatus =
+  | 'pending'    // Agendado
+  | 'arrived'    // Llego — en sala de espera
+  | 'attending'  // En consulta
+  | 'completed'  // Atendido
+  | 'cancelled'  // Cancelado
+  | 'absent'     // Ausente
 
 export interface Appointment {
-  id: string;
-  patientId: string;
-  patientName: string;
-  patientDni: string;
-  doctorId: string;
-  doctorName: string;
-  specialty: string;
-  dateTime: string;   // ISO 8601
-  status: AppointmentStatus;
-  createdAt: string;
+  id:           string
+  // Titular de la cuenta
+  patientId:    string
+  patientName:  string
+  patientDni:   string
+  // Quien se atiende (puede ser un dependiente)
+  titularName:  string
+  isDependant:  boolean
+  // Medico
+  doctorId:     string
+  doctorName:   string
+  specialty:    string
+  // Fecha
+  dateTime:     string
+  status:       AppointmentStatus
+  createdAt:    string
+  // Turno manual (cargado por admin)
+  isManual?:    boolean
+  phone?:       string
+  // Nota medica
+  medicalNote?: string
 }
 
 export interface MedicalRecord {
-  id: string;
-  patientId: string;
-  doctorId: string;
-  doctorName: string;
-  specialty: string;
-  date: string;       // ISO 8601
-  diagnosis: string;
-  treatment: string;
-  notes: string;
-  appointmentId?: string;
+  id:           string
+  patientId:    string
+  doctorId:     string
+  doctorName:   string
+  specialty:    string
+  date:         string
+  diagnosis:    string
+  treatment:    string
+  notes:        string
+  appointmentId?: string
 }
 
-// ── Reference Data ────────────────────────────────────────────────────────
-
 export interface Doctor {
-  id: string;
-  name: string;
-  specialty: string;
-  availableDays: number[];   // 0=Sun … 6=Sat
-  slots: string[];           // ['08:00','08:30',…]
+  id:               string
+  name:             string
+  specialty:        string
+  availableDays:    number[]
+  slots:            string[]
 }
 
 export interface Specialty {
-  id: string;
-  label: string;
-  icon: string;              // lucide icon name — solo referencia, no se usa en runtime
-  doctors: Doctor[];
+  id:      string
+  label:   string
+  icon:    string
+  doctors: Doctor[]
 }

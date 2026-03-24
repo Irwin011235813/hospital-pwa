@@ -4,7 +4,7 @@ import {
   onSnapshot, doc, updateDoc,
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
-import type { Appointment } from '@/types'
+import type { Appointment, AppointmentStatus } from '@/types'
 
 // ── Paciente: tiempo real ─────────────────────────────────────────────────────
 export function usePatientAppointments(patientId: string | undefined) {
@@ -13,11 +13,7 @@ export function usePatientAppointments(patientId: string | undefined) {
   const [error,        setError]        = useState<string | null>(null)
 
   useEffect(() => {
-    if (!patientId) {
-      setLoading(false)
-      return
-    }
-
+    if (!patientId) { setLoading(false); return }
     setLoading(true)
 
     const q = query(
@@ -26,12 +22,9 @@ export function usePatientAppointments(patientId: string | undefined) {
       orderBy('dateTime', 'asc'),
     )
 
-    // onSnapshot → actualización en tiempo real
-    const unsub = onSnapshot(
-      q,
+    const unsub = onSnapshot(q,
       (snap) => {
-        const data = snap.docs.map(d => ({ id: d.id, ...d.data() } as Appointment))
-        setAppointments(data)
+        setAppointments(snap.docs.map(d => ({ id: d.id, ...d.data() } as Appointment)))
         setLoading(false)
       },
       (err) => {
@@ -40,17 +33,11 @@ export function usePatientAppointments(patientId: string | undefined) {
         setLoading(false)
       }
     )
-
     return () => unsub()
   }, [patientId])
 
   const cancel = useCallback(async (id: string) => {
-    try {
-      await updateDoc(doc(db, 'appointments', id), { status: 'cancelled' })
-      // No hace falta refetch — onSnapshot actualiza solo
-    } catch (err) {
-      console.error('[cancel]', err)
-    }
+    await updateDoc(doc(db, 'appointments', id), { status: 'cancelled' })
   }, [])
 
   return { appointments, loading, error, cancel }
@@ -63,7 +50,6 @@ export function useDayAppointments(isoDate: string) {
 
   useEffect(() => {
     if (!isoDate) return
-
     setLoading(true)
 
     const start = `${isoDate}T00:00:00.000Z`
@@ -76,11 +62,9 @@ export function useDayAppointments(isoDate: string) {
       orderBy('dateTime', 'asc'),
     )
 
-    const unsub = onSnapshot(
-      q,
+    const unsub = onSnapshot(q,
       (snap) => {
-        const data = snap.docs.map(d => ({ id: d.id, ...d.data() } as Appointment))
-        setAppointments(data)
+        setAppointments(snap.docs.map(d => ({ id: d.id, ...d.data() } as Appointment)))
         setLoading(false)
       },
       (err) => {
@@ -88,17 +72,19 @@ export function useDayAppointments(isoDate: string) {
         setLoading(false)
       }
     )
-
     return () => unsub()
   }, [isoDate])
 
-  const markAttended = useCallback(async (id: string) => {
-    try {
-      await updateDoc(doc(db, 'appointments', id), { status: 'completed' })
-    } catch (err) {
-      console.error('[markAttended]', err)
-    }
+  const updateStatus = useCallback(async (id: string, status: AppointmentStatus) => {
+    await updateDoc(doc(db, 'appointments', id), { status })
   }, [])
 
-  return { appointments, loading, markAttended }
+  const saveNote = useCallback(async (id: string, note: string) => {
+    await updateDoc(doc(db, 'appointments', id), {
+      status:      'completed',
+      medicalNote: note,
+    })
+  }, [])
+
+  return { appointments, loading, updateStatus, saveNote }
 }
