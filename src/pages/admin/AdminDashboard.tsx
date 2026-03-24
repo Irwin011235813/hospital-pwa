@@ -8,7 +8,7 @@ import { BottomNav }          from '@/components/layout/BottomNav'
 import { Spinner }            from '@/components/ui/Spinner'
 import { SPECIALTIES }        from '@/lib/constants'
 import {
-  format, addDays, subDays, isToday, isTomorrow,
+  format, addDays, subDays, isToday,
 } from 'date-fns'
 import { es } from 'date-fns/locale'
 import {
@@ -20,12 +20,12 @@ import type { Appointment } from '@/types'
 
 // ── Badge de estado ───────────────────────────────────────────────────────────
 const STATUS_CONFIG = {
-  pending:   { label: 'Agendado',  cls: 'bg-amber-50  text-amber-700  border-amber-200'  },
-  arrived:   { label: 'En espera', cls: 'bg-blue-50   text-blue-700   border-blue-200'   },
-  attending: { label: 'En consulta',cls:'bg-purple-50 text-purple-700 border-purple-200' },
-  completed: { label: 'Atendido',  cls: 'bg-emerald-50 text-emerald-700 border-emerald-200'},
-  cancelled: { label: 'Cancelado', cls: 'bg-slate-100 text-slate-500  border-slate-200'  },
-  absent:    { label: 'Ausente',   cls: 'bg-red-50    text-red-600    border-red-200'    },
+  pending:   { label: 'Agendado',    cls: 'bg-amber-50   text-amber-700   border-amber-200'   },
+  arrived:   { label: 'En espera',   cls: 'bg-blue-50    text-blue-700    border-blue-200'    },
+  attending: { label: 'En consulta', cls: 'bg-purple-50  text-purple-700  border-purple-200'  },
+  completed: { label: 'Atendido',    cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  cancelled: { label: 'Cancelado',   cls: 'bg-slate-100  text-slate-500   border-slate-200'   },
+  absent:    { label: 'Ausente',     cls: 'bg-red-50     text-red-600     border-red-200'     },
 } as const
 
 function StatusBadge({ status }: { status: keyof typeof STATUS_CONFIG }) {
@@ -110,37 +110,35 @@ function ManualModal({ onClose }: ManualModalProps) {
   }
 
   return (
-    // ── Overlay ──────────────────────────────────────────────────────────────
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center
-                    bg-black/50 backdrop-blur-sm px-0 sm:px-4">
+    // Overlay
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm">
 
-      {/* Contenedor del modal — flex column con altura máxima */}
-      <div className="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl shadow-2xl
-                      flex flex-col max-h-[90vh]">
+      {/* Modal — flex col con altura maxima del 90% del viewport */}
+      <div
+        className="bg-white w-full sm:max-w-md sm:rounded-2xl rounded-t-3xl shadow-2xl"
+        style={{ display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}
+      >
 
-        {/* ── HEADER — siempre visible, no scrollea ── */}
-        <div className="flex items-center justify-between px-6 py-4
-                        border-b border-slate-100 shrink-0">
+        {/* HEADER — fijo, nunca scrollea */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100"
+             style={{ flexShrink: 0 }}>
           <div>
             <h2 className="font-bold text-base text-slate-900">Registrar Turno Manual</h2>
             <p className="text-xs text-slate-400 mt-0.5">Paciente sin acceso a la app</p>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center
-                       hover:bg-slate-200 transition-colors"
+            className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-colors"
           >
             <X size={16} className="text-slate-600" />
           </button>
         </div>
 
-        {/* ── BODY — scrolleable ── */}
-        <div className="overflow-y-auto flex-1 px-6 py-4 space-y-4">
+        {/* BODY — scrolleable, ocupa el espacio disponible */}
+        <div className="px-6 py-4 space-y-4" style={{ overflowY: 'auto', flex: 1 }}>
 
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-xl
-                            text-red-700 text-sm font-medium flex items-center gap-2">
-              <X size={14} className="shrink-0" />
+            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-medium">
               {error}
             </div>
           )}
@@ -163,16 +161,16 @@ function ManualModal({ onClose }: ManualModalProps) {
             </div>
           </div>
 
-          {/* DNI y Telefono — en fila */}
+          {/* DNI y Telefono en fila */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
                 DNI <span className="text-red-500">*</span>
               </label>
               <input
-                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm
-                           font-mono focus:outline-none focus:ring-2 focus:ring-blue-500
-                           focus:border-transparent transition-all placeholder:text-slate-400"
+                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm font-mono
+                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                           transition-all placeholder:text-slate-400"
                 placeholder="33812282"
                 inputMode="numeric"
                 maxLength={9}
@@ -191,8 +189,8 @@ function ManualModal({ onClose }: ManualModalProps) {
                 <Phone size={15} className="absolute left-3 top-3 text-slate-400" />
                 <input
                   className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-sm
-                             focus:outline-none focus:ring-2 focus:ring-blue-500
-                             focus:border-transparent transition-all placeholder:text-slate-400"
+                             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                             transition-all placeholder:text-slate-400"
                   placeholder="3764..."
                   inputMode="numeric"
                   value={form.phone}
@@ -210,8 +208,7 @@ function ManualModal({ onClose }: ManualModalProps) {
             <input
               type="date"
               className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm
-                         focus:outline-none focus:ring-2 focus:ring-blue-500
-                         focus:border-transparent transition-all"
+                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               value={form.date}
               min={format(new Date(), 'yyyy-MM-dd')}
               onChange={e => setForm(f => ({ ...f, date: e.target.value, slot: '' }))}
@@ -224,13 +221,10 @@ function ManualModal({ onClose }: ManualModalProps) {
               Especialidad <span className="text-red-500">*</span>
             </label>
             <select
-              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm
-                         focus:outline-none focus:ring-2 focus:ring-blue-500
-                         focus:border-transparent transition-all bg-white"
+              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm bg-white
+                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               value={form.specialtyId}
-              onChange={e => setForm(f => ({
-                ...f, specialtyId: e.target.value, doctorId: '', slot: ''
-              }))}
+              onChange={e => setForm(f => ({ ...f, specialtyId: e.target.value, doctorId: '', slot: '' }))}
             >
               <option value="">Seleccionar especialidad...</option>
               {SPECIALTIES.map(s => (
@@ -246,9 +240,8 @@ function ManualModal({ onClose }: ManualModalProps) {
                 Medico <span className="text-red-500">*</span>
               </label>
               <select
-                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm
-                           focus:outline-none focus:ring-2 focus:ring-blue-500
-                           focus:border-transparent transition-all bg-white"
+                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm bg-white
+                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 value={form.doctorId}
                 onChange={e => setForm(f => ({ ...f, doctorId: e.target.value, slot: '' }))}
               >
@@ -260,51 +253,44 @@ function ManualModal({ onClose }: ManualModalProps) {
             </div>
           )}
 
-          {/* Horarios — grid 4 columnas para ocupar menos espacio */}
+          {/* Horarios en grid 4 columnas */}
           {doctor && (
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-2 uppercase tracking-wide">
                 Horario <span className="text-red-500">*</span>
               </label>
               <div className="grid grid-cols-4 gap-2">
-                {doctor.slots.map(s => {
-                  const isSel = form.slot === s
-                  return (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => setForm(f => ({ ...f, slot: s }))}
-                      className={`py-2.5 rounded-xl border-2 text-xs font-bold
-                                  transition-all duration-150 active:scale-95
-                        ${isSel
-                          ? 'bg-blue-800 border-blue-800 text-white shadow-md'
-                          : 'bg-white border-slate-200 text-slate-700 hover:border-blue-400 hover:text-blue-700'
-                        }`}
-                    >
-                      {s}
-                    </button>
-                  )
-                })}
+                {doctor.slots.map(s => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setForm(f => ({ ...f, slot: s }))}
+                    className={`py-2.5 rounded-xl border-2 text-xs font-bold transition-all active:scale-95
+                      ${form.slot === s
+                        ? 'bg-blue-800 border-blue-800 text-white shadow-md'
+                        : 'bg-white border-slate-200 text-slate-700 hover:border-blue-400 hover:text-blue-700'
+                      }`}
+                  >
+                    {s}
+                  </button>
+                ))}
               </div>
               {form.slot && (
                 <p className="text-xs text-blue-700 font-semibold mt-2 text-center">
-                  Horario seleccionado: {form.slot} hs
+                  Seleccionado: {form.slot} hs
                 </p>
               )}
             </div>
           )}
-
-          {/* Spacer para que el ultimo campo no quede pegado al footer */}
-          <div className="h-2" />
         </div>
 
-        {/* ── FOOTER — siempre visible, fuera del scroll ── */}
-        <div className="px-6 py-4 border-t border-slate-100 bg-white shrink-0
-                        rounded-b-2xl space-y-2">
+        {/* FOOTER — fijo abajo, nunca scrollea */}
+        <div className="px-6 py-4 border-t border-slate-100 bg-white sm:rounded-b-2xl"
+             style={{ flexShrink: 0 }}>
 
-          {/* Resumen del turno si esta completo */}
+          {/* Resumen si esta completo */}
           {form.patientName && form.slot && doctor && (
-            <div className="p-3 bg-blue-50 rounded-xl border border-blue-100 mb-2">
+            <div className="p-2.5 bg-blue-50 rounded-xl border border-blue-100 mb-3">
               <p className="text-xs text-blue-700 font-semibold text-center">
                 {form.patientName} · {doctor.name} · {form.slot} hs
               </p>
@@ -314,18 +300,17 @@ function ManualModal({ onClose }: ManualModalProps) {
           <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="flex-1 py-3 rounded-xl border-2 border-slate-200 text-sm
-                         font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+              className="flex-1 py-3 rounded-xl border-2 border-slate-200 text-sm font-semibold
+                         text-slate-600 hover:bg-slate-50 transition-colors"
             >
               Cancelar
             </button>
             <button
               onClick={handleSave}
               disabled={saving || !form.patientName || !form.dni || !form.slot}
-              className="flex-2 flex-[2] py-3 rounded-xl bg-blue-800 text-white text-sm
-                         font-semibold flex items-center justify-center gap-2
-                         disabled:opacity-40 hover:bg-blue-900 transition-colors
-                         active:scale-[.98]"
+              className="flex-[2] py-3 rounded-xl bg-blue-800 text-white text-sm font-semibold
+                         flex items-center justify-center gap-2 disabled:opacity-40
+                         hover:bg-blue-900 transition-colors active:scale-[.98]"
             >
               {saving
                 ? <><Spinner size={16} /> Guardando...</>
@@ -342,9 +327,9 @@ function ManualModal({ onClose }: ManualModalProps) {
 
 // ── Tarjeta de turno ──────────────────────────────────────────────────────────
 interface TurnoCardProps {
-  appt:         Appointment
-  onStatus:     (id: string, status: Appointment['status']) => void
-  onSaveNote:   (id: string, note: string) => void
+  appt:       Appointment
+  onStatus:   (id: string, status: Appointment['status']) => void
+  onSaveNote: (id: string, note: string) => void
 }
 
 function TurnoCard({ appt, onStatus, onSaveNote }: TurnoCardProps) {
@@ -375,7 +360,7 @@ function TurnoCard({ appt, onStatus, onSaveNote }: TurnoCardProps) {
             )}
             {appt.isDependant && (
               <span className="text-[10px] bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full font-medium">
-                Dependiente de {appt.titularName}
+                Dep. de {appt.titularName}
               </span>
             )}
           </div>
@@ -425,10 +410,7 @@ function TurnoCard({ appt, onStatus, onSaveNote }: TurnoCardProps) {
             autoFocus
           />
           <div className="flex gap-2">
-            <button
-              onClick={() => setShowNote(false)}
-              className="btn-secondary text-xs py-1.5 flex-1"
-            >
+            <button onClick={() => setShowNote(false)} className="btn-secondary text-xs py-1.5 flex-1">
               Cancelar
             </button>
             <button
@@ -495,19 +477,16 @@ export default function AdminDashboard() {
   const user     = auth.currentUser
   const navigate = useNavigate()
 
-  // Verificacion de rol
-  const [roleChecked] = useState(true)
+  const [tab,        setTab]        = useState<TabKey>('today')
+  const [search,     setSearch]     = useState('')
+  const [showManual, setShowManual] = useState(false)
 
-  const [tab,         setTab]         = useState<TabKey>('today')
-  const [search,      setSearch]      = useState('')
-  const [showManual,  setShowManual]  = useState(false)
-
-  const todayIso    = format(new Date(),          'yyyy-MM-dd')
-  const tomorrowIso = format(addDays(new Date(),1),'yyyy-MM-dd')
-  const historyIso  = format(subDays(new Date(),1),'yyyy-MM-dd')
+  const todayIso    = format(new Date(),           'yyyy-MM-dd')
+  const tomorrowIso = format(addDays(new Date(), 1),'yyyy-MM-dd')
+  const historyIso  = format(subDays(new Date(), 1),'yyyy-MM-dd')
 
   const isoDate =
-    tab === 'today'    ? todayIso :
+    tab === 'today'    ? todayIso    :
     tab === 'tomorrow' ? tomorrowIso :
                          historyIso
 
@@ -515,7 +494,6 @@ export default function AdminDashboard() {
 
   const firstName = user?.displayName?.split(' ')[0] ?? 'Admin'
 
-  // Filtro de busqueda por DNI o nombre
   const filtered = useMemo(() => {
     if (!search.trim()) return appointments
     const q = search.toLowerCase().trim()
@@ -525,13 +503,11 @@ export default function AdminDashboard() {
     )
   }, [appointments, search])
 
-  // Stats
   const stats = useMemo(() => ({
     total:     appointments.length,
     pending:   appointments.filter(a => a.status === 'pending').length,
     arrived:   appointments.filter(a => a.status === 'arrived').length,
     completed: appointments.filter(a => a.status === 'completed').length,
-    absent:    appointments.filter(a => a.status === 'absent').length,
   }), [appointments])
 
   const handleLogout = async () => {
@@ -546,11 +522,8 @@ export default function AdminDashboard() {
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             {user?.photoURL ? (
-              <img
-                src={user.photoURL}
-                alt={firstName}
-                className="w-9 h-9 rounded-xl object-cover border border-slate-200"
-              />
+              <img src={user.photoURL} alt={firstName}
+                className="w-9 h-9 rounded-xl object-cover border border-slate-200" />
             ) : (
               <div className="w-9 h-9 rounded-xl bg-blue-800 flex items-center justify-center">
                 <span className="text-sm font-bold text-white">
@@ -564,10 +537,7 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-1">
-            <button
-              onClick={() => navigate('/admin/search')}
-              className="btn-ghost btn-icon"
-            >
+            <button onClick={() => navigate('/admin/search')} className="btn-ghost btn-icon">
               <Search size={18} />
             </button>
             <button onClick={handleLogout} className="btn-ghost btn-icon">
@@ -582,9 +552,9 @@ export default function AdminDashboard() {
         {/* Tabs */}
         <div className="flex gap-1 p-1 bg-slate-100 rounded-2xl">
           {([
-            { key: 'today',    label: 'Hoy'      },
-            { key: 'tomorrow', label: 'Manana'   },
-            { key: 'history',  label: 'Ayer'     },
+            { key: 'today',    label: 'Hoy'    },
+            { key: 'tomorrow', label: 'Manana' },
+            { key: 'history',  label: 'Ayer'   },
           ] as { key: TabKey; label: string }[]).map(t => (
             <button
               key={t.key}
@@ -603,10 +573,10 @@ export default function AdminDashboard() {
         {/* Stats */}
         <div className="grid grid-cols-4 gap-2">
           {[
-            { label: 'Total',     val: stats.total,     color: 'text-slate-800' },
-            { label: 'Pendientes',val: stats.pending,   color: 'text-amber-600' },
-            { label: 'En espera', val: stats.arrived,   color: 'text-blue-600'  },
-            { label: 'Atendidos', val: stats.completed, color: 'text-emerald-600'},
+            { label: 'Total',     val: stats.total,     color: 'text-slate-800'   },
+            { label: 'Pendientes',val: stats.pending,   color: 'text-amber-600'   },
+            { label: 'En espera', val: stats.arrived,   color: 'text-blue-600'    },
+            { label: 'Atendidos', val: stats.completed, color: 'text-emerald-600' },
           ].map(s => (
             <div key={s.label} className="card text-center py-3">
               <p className={`text-xl font-bold ${s.color}`}>{s.val}</p>
