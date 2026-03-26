@@ -111,7 +111,7 @@ function ManualModal({ onClose }: ManualModalProps) {
 
   return (
     // Overlay
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm">
 
       {/* Modal — flex col con altura maxima del 90% del viewport */}
       <div
