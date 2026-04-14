@@ -29,7 +29,7 @@ export default function VacunacionPage() {
           <p className="text-slate-700 text-sm leading-relaxed mb-4">
             Para solicitar vacunación a domicilio contactate con el Vacunatorio del Hospital Puerto Esperanza.
           </p>
-          
+          <a
             href="tel:+543757527038"
             className="w-full flex items-center justify-center gap-2 py-3 rounded-xl
                        bg-emerald-700 text-white font-semibold text-sm

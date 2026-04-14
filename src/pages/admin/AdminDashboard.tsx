@@ -4,10 +4,10 @@ import { signOut }            from 'firebase/auth'
 import { addDoc, collection } from 'firebase/firestore'
 import { auth, db }           from '@/lib/firebase'
 import { useDayAppointments } from '@/hooks/useAppointments'
-import { BottomNav }          from '@/components/layout/BottomNav'
+import VacunacionPage from '../patient/VacunacionPage'
 import { Spinner }            from '@/components/ui/Spinner'
 import { SPECIALTIES }        from '@/lib/constants'
-import { PublicarNovedad }    from '@/components/admin/PublicarNovedad'
+import { PublicarNovedad } from './PublicarNovedad'
 import {
   format, addDays, subDays,
 } from 'date-fns'
