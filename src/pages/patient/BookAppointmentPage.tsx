@@ -1,10 +1,17 @@
 import { useNavigate } from 'react-router-dom'
 import { doc, getDoc } from 'firebase/firestore'
-import { auth, db }    from '@/lib/firebase'
-import { useBooking }  from '@/hooks/useBooking'
-import { BottomNav }   from '@/components/layout/BottomNav'
-import { Spinner }     from '@/components/ui/Spinner'
-import { Alert }       from '@/components/ui/Alert'
+
+// Rutas corregidas con puntos (../..) para que Vercel no se pierda
+import { auth, db }    from '../../lib/firebase'
+import { useBooking }  from '../../hooks/useBooking'
+
+// EL FIX CLAVE: Sin llaves { } y con puntos
+import BottomNav       from '../../components/layout/BottomNav'
+
+import { Spinner }     from '../../components/ui/Spinner'
+import { Alert }       from '../../components/ui/Alert'
+
+// Librerías externas (estas se quedan igual)
 import { CheckCircle2, ChevronRight } from 'lucide-react'
 import { format } from 'date-fns'
 import { es }     from 'date-fns/locale'
