@@ -2,12 +2,18 @@ import { useState, useMemo } from 'react'
 import { useNavigate }        from 'react-router-dom'
 import { signOut }            from 'firebase/auth'
 import { addDoc, collection } from 'firebase/firestore'
-import { auth, db }           from '@/lib/firebase'
-import { useDayAppointments } from '@/hooks/useAppointments'
-import VacunacionPage from '../patient/VacunacionPage'
-import { Spinner }            from '@/components/ui/Spinner'
-import { SPECIALTIES }        from '@/lib/constants'
-import { PublicarNovedad } from './PublicarNovedad'
+
+// Rutas corregidas (saliendo de /pages/admin hacia la raíz)
+import { auth, db }           from '../../lib/firebase'
+import { useDayAppointments } from '../../hooks/useAppointments'
+import { Spinner }            from '../../components/ui/Spinner'
+import { SPECIALTIES }        from '../../lib/constants'
+
+// Componentes en la misma carpeta o hermanas
+import { PublicarNovedad }    from './PublicarNovedad'
+import BottomNav              from '../../components/layout/BottomNav'
+import VacunacionPage         from '../patient/VacunacionPage'
+
 import {
   format, addDays, subDays,
 } from 'date-fns'
@@ -17,7 +23,9 @@ import {
   Stethoscope, UserX, CheckCircle2, Clock,
   X, Plus, Phone, User, Megaphone,
 } from 'lucide-react'
-import type { Appointment } from '@/types'
+
+// Tipos
+import type { Appointment } from '../../types'
 
 // ── Badge de estado ───────────────────────────────────────────────────────────
 const STATUS_CONFIG = {
