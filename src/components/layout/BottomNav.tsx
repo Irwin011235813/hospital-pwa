@@ -14,7 +14,7 @@ const navClass = ({ isActive }: { isActive: boolean }) =>
     isActive ? 'text-blue-700 bg-blue-50' : 'text-slate-400 hover:text-slate-600',
   )
 
-export function BottomNav() {
+export default function BottomNav() {
   const [isAdmin, setIsAdmin] = useState(false)
   const navigate = useNavigate()
 
