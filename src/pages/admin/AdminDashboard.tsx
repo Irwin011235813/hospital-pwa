@@ -7,14 +7,15 @@ import { useDayAppointments } from '@/hooks/useAppointments'
 import { BottomNav }          from '@/components/layout/BottomNav'
 import { Spinner }            from '@/components/ui/Spinner'
 import { SPECIALTIES }        from '@/lib/constants'
+import { PublicarNovedad }    from '@/components/admin/PublicarNovedad'
 import {
-  format, addDays, subDays, isToday,
+  format, addDays, subDays,
 } from 'date-fns'
 import { es } from 'date-fns/locale'
 import {
-  LogOut, Search, ChevronLeft, ChevronRight,
-  ClipboardPlus, UserCheck, Stethoscope, UserX,
-  CheckCircle2, Clock, X, Plus, Phone, User,
+  LogOut, Search, ClipboardPlus, UserCheck,
+  Stethoscope, UserX, CheckCircle2, Clock,
+  X, Plus, Phone, User, Megaphone,
 } from 'lucide-react'
 import type { Appointment } from '@/types'
 
@@ -85,7 +86,6 @@ function ManualModal({ onClose }: ManualModalProps) {
       const [hh, mm] = form.slot.split(':').map(Number)
       const dt       = new Date(form.date)
       dt.setHours(hh, mm, 0, 0)
-
       await addDoc(collection(db, 'appointments'), {
         patientId:   'manual',
         patientName: form.patientName,
@@ -110,40 +110,32 @@ function ManualModal({ onClose }: ManualModalProps) {
   }
 
   return (
-    // Overlay
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm">
-
-      {/* Modal — flex col con altura maxima del 90% del viewport */}
       <div
         className="bg-white w-full sm:max-w-md sm:rounded-2xl rounded-t-3xl shadow-2xl"
         style={{ display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}
       >
-
-        {/* HEADER — fijo, nunca scrollea */}
+        {/* HEADER */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100"
              style={{ flexShrink: 0 }}>
           <div>
             <h2 className="font-bold text-base text-slate-900">Registrar Turno Manual</h2>
             <p className="text-xs text-slate-400 mt-0.5">Paciente sin acceso a la app</p>
           </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-colors"
-          >
+          <button onClick={onClose}
+            className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-colors">
             <X size={16} className="text-slate-600" />
           </button>
         </div>
 
-        {/* BODY — scrolleable, ocupa el espacio disponible */}
+        {/* BODY scrolleable */}
         <div className="px-6 py-4 space-y-4" style={{ overflowY: 'auto', flex: 1 }}>
-
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-medium">
               {error}
             </div>
           )}
 
-          {/* Nombre */}
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
               Nombre completo <span className="text-red-500">*</span>
@@ -161,7 +153,6 @@ function ManualModal({ onClose }: ManualModalProps) {
             </div>
           </div>
 
-          {/* DNI y Telefono en fila */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
@@ -200,7 +191,6 @@ function ManualModal({ onClose }: ManualModalProps) {
             </div>
           </div>
 
-          {/* Fecha */}
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
               Fecha <span className="text-red-500">*</span>
@@ -215,7 +205,6 @@ function ManualModal({ onClose }: ManualModalProps) {
             />
           </div>
 
-          {/* Especialidad */}
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
               Especialidad <span className="text-red-500">*</span>
@@ -233,7 +222,6 @@ function ManualModal({ onClose }: ManualModalProps) {
             </select>
           </div>
 
-          {/* Medico */}
           {specialty && (
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
@@ -253,7 +241,6 @@ function ManualModal({ onClose }: ManualModalProps) {
             </div>
           )}
 
-          {/* Horarios en grid 4 columnas */}
           {doctor && (
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-2 uppercase tracking-wide">
@@ -284,11 +271,9 @@ function ManualModal({ onClose }: ManualModalProps) {
           )}
         </div>
 
-        {/* FOOTER — fijo abajo, nunca scrollea */}
+        {/* FOOTER fijo — siempre visible */}
         <div className="px-6 py-4 border-t border-slate-100 bg-white sm:rounded-b-2xl"
              style={{ flexShrink: 0 }}>
-
-          {/* Resumen si esta completo */}
           {form.patientName && form.slot && doctor && (
             <div className="p-2.5 bg-blue-50 rounded-xl border border-blue-100 mb-3">
               <p className="text-xs text-blue-700 font-semibold text-center">
@@ -296,7 +281,6 @@ function ManualModal({ onClose }: ManualModalProps) {
               </p>
             </div>
           )}
-
           <div className="flex gap-3">
             <button
               onClick={onClose}
@@ -319,7 +303,6 @@ function ManualModal({ onClose }: ManualModalProps) {
             </button>
           </div>
         </div>
-
       </div>
     </div>
   )
@@ -348,7 +331,6 @@ function TurnoCard({ appt, onStatus, onSaveNote }: TurnoCardProps) {
 
   return (
     <div className={`card-md transition-all ${appt.status === 'absent' ? 'opacity-60' : ''}`}>
-      {/* Header */}
       <div className="flex items-start justify-between gap-2 mb-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -374,7 +356,6 @@ function TurnoCard({ appt, onStatus, onSaveNote }: TurnoCardProps) {
         <StatusBadge status={appt.status} />
       </div>
 
-      {/* Info turno */}
       <div className="flex flex-wrap gap-3 text-xs text-slate-600 mb-4 pb-3 border-b border-slate-100">
         <span className="flex items-center gap-1.5 font-medium">
           <Stethoscope size={13} className="text-blue-700" />
@@ -390,7 +371,6 @@ function TurnoCard({ appt, onStatus, onSaveNote }: TurnoCardProps) {
         </span>
       </div>
 
-      {/* Nota medica guardada */}
       {appt.medicalNote && !showNote && (
         <div className="mb-3 p-3 bg-slate-50 rounded-xl">
           <p className="text-xs font-medium text-slate-500 mb-1">Nota medica</p>
@@ -398,7 +378,6 @@ function TurnoCard({ appt, onStatus, onSaveNote }: TurnoCardProps) {
         </div>
       )}
 
-      {/* Area de nota */}
       {showNote && (
         <div className="mb-3">
           <textarea
@@ -425,7 +404,6 @@ function TurnoCard({ appt, onStatus, onSaveNote }: TurnoCardProps) {
         </div>
       )}
 
-      {/* Acciones */}
       {appt.status !== 'completed' && appt.status !== 'cancelled' && appt.status !== 'absent' && (
         <div className="flex flex-wrap gap-2">
           {appt.status === 'pending' && (
@@ -477,13 +455,14 @@ export default function AdminDashboard() {
   const user     = auth.currentUser
   const navigate = useNavigate()
 
-  const [tab,        setTab]        = useState<TabKey>('today')
-  const [search,     setSearch]     = useState('')
-  const [showManual, setShowManual] = useState(false)
+  const [tab,         setTab]         = useState<TabKey>('today')
+  const [search,      setSearch]      = useState('')
+  const [showManual,  setShowManual]  = useState(false)
+  const [showNovedad, setShowNovedad] = useState(false)
 
-  const todayIso    = format(new Date(),           'yyyy-MM-dd')
-  const tomorrowIso = format(addDays(new Date(), 1),'yyyy-MM-dd')
-  const historyIso  = format(subDays(new Date(), 1),'yyyy-MM-dd')
+  const todayIso    = format(new Date(),            'yyyy-MM-dd')
+  const tomorrowIso = format(addDays(new Date(), 1), 'yyyy-MM-dd')
+  const historyIso  = format(subDays(new Date(), 1), 'yyyy-MM-dd')
 
   const isoDate =
     tab === 'today'    ? todayIso    :
@@ -517,7 +496,8 @@ export default function AdminDashboard() {
 
   return (
     <div className="page-root">
-      {/* Header */}
+
+      {/* Header con foto y nombre real */}
       <header className="page-header">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -532,11 +512,22 @@ export default function AdminDashboard() {
               </div>
             )}
             <div>
-              <p className="font-semibold text-slate-900 text-sm">Dr/a. {firstName}</p>
+              {/* FIX: displayName real del usuario logueado */}
+              <p className="font-semibold text-slate-900 text-sm">
+                {user?.displayName ?? 'Admin'}
+              </p>
               <p className="text-xs text-slate-400">Panel Admin</p>
             </div>
           </div>
           <div className="flex items-center gap-1">
+            {/* FIX: boton Publicar Novedad */}
+            <button
+              onClick={() => setShowNovedad(true)}
+              className="btn-ghost btn-icon"
+              aria-label="Publicar novedad"
+            >
+              <Megaphone size={18} />
+            </button>
             <button onClick={() => navigate('/admin/search')} className="btn-ghost btn-icon">
               <Search size={18} />
             </button>
@@ -549,11 +540,11 @@ export default function AdminDashboard() {
 
       <div className="page-content space-y-4">
 
-        {/* Tabs */}
+        {/* Tabs — FIX: Mañana con tilde */}
         <div className="flex gap-1 p-1 bg-slate-100 rounded-2xl">
           {([
             { key: 'today',    label: 'Hoy'    },
-            { key: 'tomorrow', label: 'Manana' },
+            { key: 'tomorrow', label: 'Mañana' },
             { key: 'history',  label: 'Ayer'   },
           ] as { key: TabKey; label: string }[]).map(t => (
             <button
@@ -604,7 +595,7 @@ export default function AdminDashboard() {
           </button>
         </div>
 
-        {/* Lista de turnos */}
+        {/* Lista */}
         {loading ? (
           <div className="flex flex-col gap-3">
             <SkeletonCard />
@@ -631,8 +622,9 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* Modal turno manual */}
-      {showManual && <ManualModal onClose={() => setShowManual(false)} />}
+      {/* Modales */}
+      {showManual  && <ManualModal     onClose={() => setShowManual(false)}  />}
+      {showNovedad && <PublicarNovedad onClose={() => setShowNovedad(false)} />}
 
       <BottomNav />
     </div>
