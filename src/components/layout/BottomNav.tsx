@@ -1,48 +1,76 @@
-import { useNavigate } from 'react-router-dom'
-import { Syringe, ArrowLeft, Phone } from 'lucide-react'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { doc, getDoc }          from 'firebase/firestore'
+import { auth, db }             from '@/lib/firebase'
+import { useState, useEffect }  from 'react'
+import {
+  Home, CalendarPlus, Search,
+  CalendarDays, Megaphone,
+} from 'lucide-react'
+import clsx from 'clsx'
 
-export default function VacunacionPage() {
+const navClass = ({ isActive }: { isActive: boolean }) =>
+  clsx(
+    'flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all duration-150 min-w-[60px]',
+    isActive ? 'text-blue-700 bg-blue-50' : 'text-slate-400 hover:text-slate-600',
+  )
+
+export function BottomNav() {
+  const [isAdmin, setIsAdmin] = useState(false)
   const navigate = useNavigate()
-  return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="bg-white border-b border-slate-100 px-4 py-3 sticky top-0 z-40">
-        <div className="max-w-2xl mx-auto flex items-center gap-3">
-          <button onClick={() => navigate('/home')} className="btn-ghost btn-icon -ml-1">
-            <ArrowLeft size={20} />
-          </button>
-          <p className="font-semibold text-slate-900">Vacunación a Domicilio</p>
-        </div>
-      </header>
-      <div className="max-w-2xl mx-auto px-4 py-8 text-center">
-        <div className="w-20 h-20 bg-emerald-100 rounded-3xl flex items-center
-                        justify-center mx-auto mb-6">
-          <Syringe size={36} className="text-emerald-700" strokeWidth={1.5} />
-        </div>
-        <h1 className="font-bold text-2xl text-slate-900 mb-2">Vacunación a Domicilio</h1>
-        <p className="text-slate-500 text-base mb-2">
-          Lunes a Viernes · 7:00 a 13:00 hs
-        </p>
-        <p className="text-slate-500 text-sm mb-8">
-          Encargada: Núñez Diana
-        </p>
-        <div className="card-md mb-4">
-          <p className="text-slate-700 text-sm leading-relaxed mb-4">
-            Para solicitar vacunación a domicilio contactate con el Vacunatorio del Hospital Puerto Esperanza.
-          </p>
-          <a
-            href="tel:+543757527038"
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl
-                       bg-emerald-700 text-white font-semibold text-sm
-                       active:scale-[.98] transition-transform"
+
+  useEffect(() => {
+    const user = auth.currentUser
+    if (!user) return
+    getDoc(doc(db, 'users', user.uid)).then(snap => {
+      if (snap.exists()) setIsAdmin(snap.data().role === 'admin')
+    })
+  }, [])
+
+  if (isAdmin) return (
+    <nav className="fixed bottom-0 inset-x-0 z-50 safe-bottom">
+      <div className="bg-white/90 backdrop-blur-md border-t border-slate-100
+                      shadow-[0_-2px_16px_rgb(0,0,0,.06)]">
+        <div className="max-w-2xl mx-auto flex justify-around items-center px-2 py-1.5">
+          <NavLink to="/admin"        end className={navClass}>
+            <CalendarDays size={22} strokeWidth={1.8} />
+            <span className="text-[10px] font-semibold">Agenda</span>
+          </NavLink>
+          <NavLink to="/admin/search" className={navClass}>
+            <Search size={22} strokeWidth={1.8} />
+            <span className="text-[10px] font-semibold">Pacientes</span>
+          </NavLink>
+          <button
+            onClick={() => navigate('/admin?novedad=1')}
+            className="flex flex-col items-center gap-1 px-4 py-2 rounded-xl
+                       text-slate-400 hover:text-slate-600 min-w-[60px]"
           >
-            <Phone size={18} />
-            Llamar al Vacunatorio
-          </a>
+            <Megaphone size={22} strokeWidth={1.8} />
+            <span className="text-[10px] font-semibold">Publicar</span>
+          </button>
         </div>
-        <p className="text-xs text-slate-400">
-          También podés acercarte al hospital en el horario de atención.
-        </p>
       </div>
-    </div>
+    </nav>
+  )
+
+  return (
+    <nav className="fixed bottom-0 inset-x-0 z-50 safe-bottom">
+      <div className="bg-white/90 backdrop-blur-md border-t border-slate-100
+                      shadow-[0_-2px_16px_rgb(0,0,0/.06)]">
+        <div className="max-w-2xl mx-auto flex justify-around items-center px-2 py-1.5">
+          <NavLink to="/home"         end className={navClass}>
+            <Home size={22} strokeWidth={1.8} />
+            <span className="text-[10px] font-semibold">Inicio</span>
+          </NavLink>
+          <NavLink to="/patient"      end className={navClass}>
+            <CalendarPlus size={22} strokeWidth={1.8} />
+            <span className="text-[10px] font-semibold">Mis Turnos</span>
+          </NavLink>
+          <NavLink to="/patient/book"     className={navClass}>
+            <CalendarDays size={22} strokeWidth={1.8} />
+            <span className="text-[10px] font-semibold">Sacar Turno</span>
+          </NavLink>
+        </div>
+      </div>
+    </nav>
   )
 }
