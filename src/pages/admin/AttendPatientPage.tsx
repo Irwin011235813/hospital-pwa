@@ -1,13 +1,18 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
-import { auth, db }              from '@/lib/firebase'
-import { medicalRecordService }  from '@/services/medicalRecordService'
-import { Spinner }               from '@/components/ui/Spinner'
+
+// Cambiamos el @/ por ../.. para que Vercel encuentre las carpetas
+import { auth, db }              from '../../lib/firebase'
+import { medicalRecordService }  from '../../services/medicalRecordService'
+import { Spinner }               from '../../components/ui/Spinner'
+
 import { CheckCircle2, ArrowLeft } from 'lucide-react'
-import type { Appointment }      from '@/types'
 import { format }                from 'date-fns'
 import { es }                    from 'date-fns/locale'
+
+// Tipos
+import type { Appointment }      from '../../types'
 
 export default function AttendPatientPage() {
   const { id }      = useParams<{ id: string }>()

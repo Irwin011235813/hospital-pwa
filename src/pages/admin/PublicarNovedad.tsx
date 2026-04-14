@@ -1,7 +1,10 @@
 import { useState } from 'react'
-import { addDoc, collection } from 'firebase/firestore'
-import { auth, db } from '@/lib/firebase'
-import { Spinner }  from '@/components/ui/Spinner'
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore'
+
+// Subimos dos niveles (../..) para salir de pages/admin y entrar a lib y components
+import { auth, db } from '../../lib/firebase'
+import { Spinner }  from '../../components/ui/Spinner'
+
 import { X, Megaphone, Star } from 'lucide-react'
 
 interface Props { onClose: () => void }

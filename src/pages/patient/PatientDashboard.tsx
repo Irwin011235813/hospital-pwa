@@ -1,10 +1,16 @@
 import { useNavigate } from 'react-router-dom'
-import { usePatientAppointments } from '@/hooks/useAppointments'
 import { signOut } from 'firebase/auth'
-import { auth } from '@/lib/firebase'
-import BottomNav from '@/components/layout/BottomNav'
-import { AppointmentCard } from '@/components/patient/AppointmentCard'
-import { EmptyState } from '@/components/ui/EmptyState'
+
+// Rutas corregidas (saliendo de /pages/patient hacia la raíz)
+import { usePatientAppointments } from '../../hooks/useAppointments'
+import { auth } from '../../lib/firebase'
+import { AppointmentCard } from '../../components/patient/AppointmentCard'
+import { EmptyState } from '../../components/ui/EmptyState'
+
+// Componente que ya habías arreglado
+import BottomNav from '../../components/layout/BottomNav'
+
+// Librerías externas (estas se quedan igual)
 import { CalendarPlus, LogOut, Calendar, ClipboardList } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'

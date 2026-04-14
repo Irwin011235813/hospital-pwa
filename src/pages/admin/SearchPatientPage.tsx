@@ -1,15 +1,21 @@
 import { useState } from 'react'
-import { useAuthContext }        from '@/context/AuthContext'
-import { userService }           from '@/services/userService'
-import { medicalRecordService }  from '@/services/medicalRecordService'
-import { PageHeader }            from '@/components/layout/PageHeader'
-import BottomNav from '@/components/layout/BottomNav'
-import { Spinner }               from '@/components/ui/Spinner'
-import { Alert }                 from '@/components/ui/Alert'
+
+// Rutas corregidas (subiendo dos niveles para llegar a src)
+import { useAuthContext }        from '../../context/AuthContext'
+import { userService }           from '../../services/userService'
+import { medicalRecordService }  from '../../services/medicalRecordService'
+import { PageHeader }            from '../../components/layout/PageHeader'
+import BottomNav                 from '../../components/layout/BottomNav'
+import { Spinner }               from '../../components/ui/Spinner'
+import { Alert }                 from '../../components/ui/Alert'
+
+// Librerías externas (se quedan igual)
 import { Search, UserCircle2, ChevronDown, ChevronUp } from 'lucide-react'
 import { format } from 'date-fns'
 import { es }     from 'date-fns/locale'
-import type { AppUser, MedicalRecord } from '@/types'
+
+// Tipos
+import type { AppUser, MedicalRecord } from '../../types'
 
 export default function SearchPatientPage() {
   const [dni,     setDni]     = useState('')
