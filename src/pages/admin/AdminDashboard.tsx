@@ -794,7 +794,7 @@ export default function AdminDashboard() {
       {/* Modales */}
       {showManual && <ManualModal onClose={() => setShowManual(false)} />}
 
-      <BottomNav />
+      {/* <BottomNav /> Eliminado para AdminDashboard */}
     </div>
   )
 }
