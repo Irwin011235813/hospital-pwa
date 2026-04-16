@@ -6,12 +6,13 @@ import { usePatientAppointments } from '../../hooks/useAppointments'
 import { auth } from '../../lib/firebase'
 import { AppointmentCard } from '../../components/patient/AppointmentCard'
 import { EmptyState } from '../../components/ui/EmptyState'
+import { MedicalSchedule } from '../../components/patient/MedicalSchedule'
 
 // Componente que ya habías arreglado
 import BottomNav from '../../components/layout/BottomNav'
 
 // Librerías externas (estas se quedan igual)
-import { CalendarPlus, LogOut, Calendar, ClipboardList } from 'lucide-react'
+import { CalendarPlus, LogOut, Calendar, ClipboardList, CalendarDays } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 
@@ -112,18 +113,14 @@ const past = appointments.filter(a =>
 
         {/* Acciones rapidas */}
         <div className="grid grid-cols-2 gap-3">
-          <button
-            onClick={() => navigate('/patient/book')}
-            className="card flex flex-col items-start gap-3 p-5 transition-shadow
-                       hover:shadow-card-md active:scale-[.98]"
-          >
+          <div className="card flex flex-col items-start gap-3 p-5">
             <div className="w-10 h-10 rounded-xl bg-blue-800 flex items-center justify-center">
               <CalendarPlus size={20} className="text-white" strokeWidth={1.8} />
             </div>
             <p className="font-semibold text-slate-800 text-sm leading-tight">
-              Solicitar<br/>Turno
+              Agenda y turnos no están disponibles aún
             </p>
-          </button>
+          </div>
           <button
             onClick={() => navigate('/patient/records')}
             className="card flex flex-col items-start gap-3 p-5 transition-shadow
@@ -138,73 +135,15 @@ const past = appointments.filter(a =>
           </button>
         </div>
 
-        {/* Proximo turno destacado */}
-        {!loading && next && (
-          <div>
-            <p className="section-title">Proximo turno</p>
-            <AppointmentCard appointment={next} onCancel={handleCancel} />
-          </div>
-        )}
-
-        {/* Turnos activos */}
+        {/* Cronograma de especialistas */}
         <div>
-          <div className="flex items-center justify-between mb-3">
-            <p className="section-title mb-0">Turnos activos</p>
-            {!loading && (
-              <span className="text-xs text-slate-400">
-                {upcoming.length} turno{upcoming.length !== 1 ? 's' : ''}
-              </span>
-            )}
+          <div className="flex items-center gap-2 mb-1">
+            <CalendarDays size={16} className="text-slate-400" />
+            <p className="section-title mb-0">Cronograma de Especialistas</p>
           </div>
-
-          {loading ? (
-            // Skeleton mientras carga
-            <div className="flex flex-col gap-3">
-              <SkeletonCard />
-              <SkeletonCard />
-            </div>
-          ) : upcoming.length === 0 ? (
-            <EmptyState
-              icon={Calendar}
-              title="Sin turnos activos"
-              description="Solicita un turno y aparecera aca."
-              action={
-                <button
-                  onClick={() => navigate('/patient/book')}
-                  className="btn-primary"
-                >
-                  <CalendarPlus size={16} /> Solicitar turno
-                </button>
-              }
-            />
-          ) : (
-            <div className="flex flex-col gap-3 stagger">
-              {upcoming.map(a => (
-                <AppointmentCard key={a.id} appointment={a} onCancel={handleCancel} />
-              ))}
-            </div>
-          )}
+          <p className="text-xs text-slate-500 mb-3">Turno mañana -- 08:00 a 12:00 hs</p>
+          <MedicalSchedule />
         </div>
-
-        {/* Historial rapido — turnos pasados */}
-        {!loading && past.length > 0 && (
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <p className="section-title mb-0">Consultas anteriores</p>
-              <button
-                onClick={() => navigate('/patient/records')}
-                className="text-xs text-blue-600 font-semibold"
-              >
-                Ver todo
-              </button>
-            </div>
-            <div className="flex flex-col gap-3">
-              {past.slice(0, 2).map(a => (
-                <AppointmentCard key={a.id} appointment={a} />
-              ))}
-            </div>
-          </div>
-        )}
 
       </div>
       <BottomNav />

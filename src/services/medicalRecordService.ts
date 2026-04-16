@@ -1,6 +1,6 @@
 import { db } from '@/lib/firebase'
 import {
-  collection, doc, addDoc, updateDoc,
+  collection, addDoc, updateDoc,
   getDocs, query, where, orderBy,
 } from 'firebase/firestore'
 import type { MedicalRecord } from '@/types'

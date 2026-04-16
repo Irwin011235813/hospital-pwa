@@ -1,6 +1,8 @@
+/// <reference types="vite/client" />
 import { initializeApp }               from 'firebase/app'
 import { getAuth, GoogleAuthProvider }  from 'firebase/auth'
-import { getFirestore }                 from 'firebase/firestore'
+import { getFirestore, initializeFirestore, persistentLocalCache } from 'firebase/firestore'
+import { getStorage }                   from 'firebase/storage'
 
 // ── Validación de variables de entorno ────────────────────────────────────────
 // Si falta alguna variable el mensaje aparece en consola con instrucciones claras,
@@ -35,8 +37,12 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig)
 
-export const auth           = getAuth(app)
-export const db             = getFirestore(app)
+// Firestore con cache persistente
+export const db = initializeFirestore(app, {
+  localCache: persistentLocalCache()
+})
+export const auth = getAuth(app)
+export const storage = getStorage(app)
 export const googleProvider = (() => {
   const p = new GoogleAuthProvider()
   p.setCustomParameters({ prompt: 'select_account' })

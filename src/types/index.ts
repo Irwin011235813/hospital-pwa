@@ -69,3 +69,34 @@ export interface Specialty {
   icon:    string
   doctors: Doctor[]
 }
+
+export interface NewsItem {
+  id:         string
+  titulo:     string
+  cuerpo:     string
+  categoria:  'Salud' | 'Institucional' | 'Urgente'
+  imagen?:    string
+  destacada:  boolean
+  fecha:      string
+  autorId:    string
+}
+
+export interface ScheduleEntry {
+  id:          string
+  day:         number           // 1=Lunes ... 5=Viernes
+  specialty:   string
+  doctorName:  string
+  timeRange:   string
+  shift?:      'manana' | 'tarde'
+  note?:       string           // ej: "1° y 3° sabado del mes"
+}
+
+export interface PermanentService {
+  name:         string
+  schedule:     string
+  responsible?: string
+  details?:     string[]
+  detailLabel?: string
+  professional?: string
+  contact?:     string
+}

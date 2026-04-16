@@ -1,12 +1,12 @@
 import type { AppointmentStatus } from '@/types'
 
-const MAP: Record<AppointmentStatus, string> = {
+const MAP: Partial<Record<AppointmentStatus, string>> = {
   pending:   'badge-pending',
   completed: 'badge-completed',
   cancelled: 'badge-cancelled',
 }
 
-const LABELS: Record<AppointmentStatus, string> = {
+const LABELS: Partial<Record<AppointmentStatus, string>> = {
   pending:   'Pendiente',
   completed: 'Atendido',
   cancelled: 'Cancelado',

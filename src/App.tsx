@@ -8,12 +8,12 @@ import LoginPage           from '@/pages/LoginPage'
 import SetupDniPage        from '@/pages/SetupDniPage'
 import UserHome            from '@/pages/patient/UserHome'
 import PatientDashboard    from '@/pages/patient/PatientDashboard'
-import BookAppointmentPage from '@/pages/patient/BookAppointmentPage'
 import MedicalRecordsPage  from '@/pages/patient/MedicalRecordsPage'
 import VacunacionPage from './pages/patient/VacunacionPage'
 import AdminDashboard      from '@/pages/admin/AdminDashboard'
 import AttendPatientPage   from '@/pages/admin/AttendPatientPage'
 import SearchPatientPage   from '@/pages/admin/SearchPatientPage'
+import OfflineAlert from '@/components/ui/OfflineAlert'
 
 function LoadingScreen() {
   return (
@@ -41,8 +41,12 @@ export default function App() {
       if (fbUser) {
         try {
           const snap = await getDoc(doc(db, 'users', fbUser.uid))
+          console.log('[App] auth uid:', fbUser.uid, 'user doc exists:', snap.exists(), 'data:', snap.data())
           if (snap.exists()) setRole(snap.data().role ?? 'patient')
-        } catch { setRole('patient') }
+        } catch (err) {
+          console.error('[App] error reading user role:', err)
+          setRole('patient')
+        }
       }
       setLoadingAuth(false)
     })
@@ -54,8 +58,10 @@ export default function App() {
   const isAdmin = role === 'admin'
 
   return (
-    <Router>
-      <Routes>
+    <>
+      <OfflineAlert />
+      <Router>
+        <Routes>
         {/* Publica */}
         <Route path="/login" element={
           !user ? <LoginPage /> : <Navigate to={isAdmin ? '/admin' : '/home'} replace />
@@ -67,7 +73,6 @@ export default function App() {
         {/* Paciente */}
         <Route path="/home"            element={user ? <UserHome />            : <Navigate to="/login" replace />}/>
         <Route path="/patient"         element={user ? <PatientDashboard />    : <Navigate to="/login" replace />}/>
-        <Route path="/patient/book"    element={user ? <BookAppointmentPage /> : <Navigate to="/login" replace />}/>
         <Route path="/patient/records" element={user ? <MedicalRecordsPage />  : <Navigate to="/login" replace />}/>
         <Route path="/patient/vacunacion" element={user ? <VacunacionPage />   : <Navigate to="/login" replace />}/>
 
@@ -78,7 +83,8 @@ export default function App() {
 
         <Route path="/" element={<Navigate to="/login" replace />}/>
         <Route path="*" element={<Navigate to="/login" replace />}/>
-      </Routes>
-    </Router>
-  )
+        </Routes>
+       </Router>
+    </>
+  );
 }

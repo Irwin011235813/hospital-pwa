@@ -3,11 +3,15 @@ import { useNavigate }         from 'react-router-dom'
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore'
 import { signOut }             from 'firebase/auth'
 import { auth, db }            from '@/lib/firebase'
-import { NoticiasCard }        from '@/components/patient/NoticiasCard'
+import { NewsFeed }            from '@/components/patient/NewsFeed'
+import { MedicalSchedule }     from '@/components/patient/MedicalSchedule'
 import type { Noticia }        from '@/components/patient/NoticiasCard'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { Pagination }          from 'swiper/modules'
+import 'swiper/css'
+import 'swiper/css/pagination'
 import {
-  CalendarPlus, Syringe, LogOut,
-  Smartphone, X, ChevronDown,
+  LogOut, Smartphone, X, ChevronDown, CalendarDays, Megaphone,
 } from 'lucide-react'
 
 // ── Banner PWA ────────────────────────────────────────────────────────────────
@@ -89,18 +93,6 @@ function PWABanner({ onClose }: { onClose: () => void }) {
   )
 }
 
-// ── Skeleton noticia ──────────────────────────────────────────────────────────
-function SkeletonNoticia() {
-  return (
-    <div className="card-md animate-pulse">
-      <div className="h-32 bg-slate-200 rounded-xl mb-3" />
-      <div className="h-3 w-20 bg-slate-200 rounded mb-2" />
-      <div className="h-4 w-full bg-slate-200 rounded mb-1" />
-      <div className="h-3 w-3/4 bg-slate-100 rounded" />
-    </div>
-  )
-}
-
 // ── UserHome ──────────────────────────────────────────────────────────────────
 export default function UserHome() {
   const user     = auth.currentUser
@@ -169,74 +161,57 @@ export default function UserHome() {
         {/* Banner PWA */}
         {showBanner && <PWABanner onClose={closeBanner} />}
 
-        {/* CTAs principales */}
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            onClick={() => navigate('/patient/book')}
-            className="bg-blue-800 text-white rounded-2xl p-4 flex flex-col items-start gap-3
-                       active:scale-[.97] transition-transform shadow-md"
-          >
-            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-              <CalendarPlus size={22} className="text-white" strokeWidth={1.8} />
+        {/* Swiper deslizable */}
+        <Swiper
+          modules={[Pagination]}
+          spaceBetween={20}
+          slidesPerView={1}
+          pagination={{ clickable: true }}
+          className="pb-8"
+        >
+          {/* Slide 1: Novedades */}
+          <SwiperSlide>
+            <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-blue-50 rounded-lg text-blue-700">
+                  <Megaphone size={20} />
+                </div>
+                <div>
+                  <h2 className="font-bold text-slate-900 text-lg">Novedades</h2>
+                  <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Información del hospital</p>
+                </div>
+              </div>
+              <NewsFeed
+                items={noticias as any}
+                loading={loading}
+              />
             </div>
-            <div>
-              <p className="font-bold text-sm leading-tight">Solicitar</p>
-              <p className="font-bold text-sm leading-tight">Turno</p>
-            </div>
-          </button>
+          </SwiperSlide>
 
-          <button
-            onClick={() => navigate('/patient/vacunacion')}
-            className="bg-emerald-700 text-white rounded-2xl p-4 flex flex-col items-start gap-3
-                       active:scale-[.97] transition-transform shadow-md"
-          >
-            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-              <Syringe size={22} className="text-white" strokeWidth={1.8} />
+          {/* Slide 2: Cronograma */}
+          <SwiperSlide>
+            <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-brand-50 rounded-lg text-brand-700">
+                  <CalendarDays size={20} />
+                </div>
+                <div>
+                  <h2 className="font-bold text-slate-900 text-lg">Cronograma</h2>
+                  <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Especialidades y horarios</p>
+                </div>
+              </div>
+              <MedicalSchedule />
+              {/* Info horarios */}
+              <div className="mt-4 p-3 bg-slate-50 rounded-xl">
+                <p className="font-semibold text-slate-800 text-sm">Atención: Lun a Vie</p>
+                <p className="text-xs text-slate-500">08:00 a 12:00 hs -- Horario corrido</p>
+                <div className="mt-2 text-sm text-slate-500">
+                La agenda de especialidades se publica aquí cuando el servicio vuelve a estar disponible.
+              </div>
+              </div>
             </div>
-            <div>
-              <p className="font-bold text-sm leading-tight">Vacunación</p>
-              <p className="font-bold text-sm leading-tight text-white/80">a domicilio</p>
-            </div>
-          </button>
-        </div>
-
-        {/* Info horarios */}
-        <div className="card flex items-center justify-between py-3">
-          <div>
-            <p className="font-semibold text-slate-800 text-sm">Atención: Lun a Vie</p>
-            <p className="text-xs text-slate-500">6:00 a 18:00 hs · Horario corrido</p>
-          </div>
-          <button
-            onClick={() => navigate('/patient/book')}
-            className="text-blue-700 text-xs font-semibold flex items-center gap-1"
-          >
-            Ver turnos <ChevronDown size={14} className="rotate-[-90deg]" />
-          </button>
-        </div>
-
-        {/* Feed de noticias */}
-        <div>
-          <p className="section-title">Novedades del Hospital</p>
-
-          {loading ? (
-            <div className="flex flex-col gap-3">
-              <SkeletonNoticia />
-              <SkeletonNoticia />
-            </div>
-          ) : noticias.length === 0 ? (
-            <div className="card text-center py-8">
-              <p className="text-slate-400 text-sm">
-                No hay novedades publicadas aún.
-              </p>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-4 stagger">
-              {noticias.map(n => (
-                <NoticiasCard key={n.id} noticia={n} />
-              ))}
-            </div>
-          )}
-        </div>
+          </SwiperSlide>
+        </Swiper>
 
       </div>
     </div>

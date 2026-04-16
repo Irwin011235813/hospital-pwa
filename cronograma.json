@@ -1,0 +1,112 @@
+{
+  "cronograma_semanal": [
+    {
+      "dia": "Lunes",
+      "mañana": [
+        { "especialidad": "Radiólogo", "profesional": "Torales, Fabián" },
+        { "especialidad": "Odontóloga", "profesional": "Dra. Duda, Sandra" },
+        { "especialidad": "Traumatólogo", "profesional": "Dr. Guojon, Ariel" },
+        { "especialidad": "Medicina Gral. Médico Cirujano", "profesional": "Dr. Rojas, Miguel" },
+        { "especialidad": "Electrocardiograma", "profesional": "Téc. Bustamante, Norma", "nota": "07:00 a 10:00 hs" },
+        { "especialidad": "Medicina Familiar", "profesional": "Dra. Sanchez Luthard, Angeles" }
+      ],
+      "tarde": [
+        { "especialidad": "Pediatra", "profesional": "Dra. Peña, Fuegina" },
+        { "especialidad": "Radióloga", "profesional": "Rotela, Claudia" },
+        { "especialidad": "Ginecólogo", "profesional": "Dr. Núñez, Emilio" },
+        { "especialidad": "Medicina Familiar", "profesional": "Dra. Sanchez Luthard, Angeles" }
+      ]
+    },
+    {
+      "dia": "Martes",
+      "mañana": [
+        { "especialidad": "Radiólogo", "profesional": "Torales, Fabián" },
+        { "especialidad": "Odontóloga", "profesional": "Dra. Duda, Sandra" },
+        { "especialidad": "Traumatólogo", "profesional": "Dr. Guojon, Ariel" },
+        { "especialidad": "Pediatra", "profesional": "Dra. Antueno, Luciana" },
+        { "especialidad": "Lic. en Obstetricia", "profesional": "Mendia, María", "nota": "Consultas" },
+        { "especialidad": "Medicina Gral. Médico Cirujano", "profesional": "Dr. Rojas, Miguel" },
+        { "especialidad": "Medicina Familiar", "profesional": "Dra. Sanchez Luthard, Angeles" }
+      ],
+      "tarde": [
+        { "especialidad": "Radióloga", "profesional": "Rotela, Claudia" },
+        { "especialidad": "Clínica Médica", "profesional": "Dr. Gómez, Fernando" },
+        { "especialidad": "Medicina Gral. Médico Cirujano", "profesional": "Dr. Rojas, Miguel" },
+        { "especialidad": "Lic. en Nutrición", "profesional": "Jerkovich, Juliana", "nota": "Consultas" },
+        { "especialidad": "Medicina Familiar", "profesional": "Dra. Sanchez Luthard, Angeles" }
+      ]
+    },
+    {
+      "dia": "Miércoles",
+      "mañana": [
+        { "especialidad": "Radiólogo", "profesional": "Torales, Fabián" },
+        { "especialidad": "Odontóloga", "profesional": "Dra. Duda, Sandra" },
+        { "especialidad": "Ecografía", "profesional": "Dr. Rondón, César", "nota": "Ginecólogo" },
+        { "especialidad": "Pediatra", "profesional": "Dra. Antueno, Luciana" },
+        { "especialidad": "Medicina Gral. Médico Cirujano", "profesional": "Dr. Rojas, Miguel" },
+        { "especialidad": "Electrocardiograma", "profesional": "Téc. Bustamante, Norma", "nota": "07:00 a 10:00 hs" },
+        { "especialidad": "Medicina Familiar", "profesional": "Dra. Sanchez Luthard, Angeles" }
+      ],
+      "tarde": [
+        { "especialidad": "Radióloga", "profesional": "Rotela, Claudia" },
+        { "especialidad": "Medicina Gral. Médico Cirujano", "profesional": "Dr. Rojas, Miguel" },
+        { "especialidad": "Medicina Familiar", "profesional": "Dra. Sanchez Luthard, Angeles" }
+      ]
+    },
+    {
+      "dia": "Jueves",
+      "mañana": [
+        { "especialidad": "Radiólogo", "profesional": "Torales, Fabián" },
+        { "especialidad": "Odontóloga", "profesional": "Dra. Duda, Sandra" },
+        { "especialidad": "Traumatólogo", "profesional": "Dr. Guojon, Ariel" },
+        { "especialidad": "Lic. en Obstetricia", "profesional": "Mendia, María", "nota": "Prácticas e Implantes" },
+        { "especialidad": "Medicina Gral. Médico Cirujano", "profesional": "Dr. Rojas, Miguel" },
+        { "especialidad": "Medicina Familiar", "profesional": "Dra. Sanchez Luthard, Angeles" }
+      ],
+      "tarde": [
+        { "especialidad": "Pediatra", "profesional": "Dra. Peña, Fuegina" },
+        { "especialidad": "Radióloga", "profesional": "Rotela, Claudia" },
+        { "especialidad": "Lic. en Nutrición", "profesional": "Jerkovich, Juliana", "nota": "Consultas" },
+        { "especialidad": "Medicina Gral. Médico Cirujano", "profesional": "Dr. Rojas, Miguel" },
+        { "especialidad": "Medicina Familiar", "profesional": "Dra. Sanchez Luthard, Angeles" }
+      ]
+    },
+    {
+      "dia": "Viernes",
+      "mañana": [
+        { "especialidad": "Radiólogo", "profesional": "Torales, Fabián" },
+        { "especialidad": "Odontóloga", "profesional": "Dra. Duda, Sandra" },
+        { "especialidad": "Traumatólogo", "profesional": "Dr. Guojon, Ariel" },
+        { "especialidad": "Psicóloga", "profesional": "Lic. González, Melina" },
+        { "especialidad": "Lic. en Obstetricia", "profesional": "Mendia, María", "nota": "Consultas" },
+        { "especialidad": "Clínica Médica", "profesional": "Dr. Gómez, Fernando" },
+        { "especialidad": "Medicina Gral. Médico Cirujano", "profesional": "Dr. Rojas, Miguel" },
+        { "especialidad": "Electrocardiograma", "profesional": "Téc. Bustamante, Norma", "nota": "07:00 a 10:00 hs" },
+        { "especialidad": "Medicina Familiar", "profesional": "Dra. Sanchez Luthard, Angeles" },
+        { "especialidad": "Cardiólogo", "profesional": "Dr. Paviolo, José", "nota": "Turnos programados" }
+      ],
+      "tarde": [
+        { "especialidad": "Pediatra", "profesional": "Dr. Cogorno, Walter" },
+        { "especialidad": "Radióloga", "profesional": "Rotela, Claudia" },
+        { "especialidad": "Lic. en Nutrición", "profesional": "Jerkovich, Juliana", "nota": "Consultas" },
+        { "especialidad": "Ecografías", "profesional": "Dr. Schafer, Gerardo", "nota": "Ginecólogo Esp. en Imágenes" },
+        { "especialidad": "Cardiólogo", "profesional": "Dr. Correa Alfaro, Freddy", "nota": "Cada 15 días" },
+        { "especialidad": "Medicina Gral. Médico Cirujano", "profesional": "Dr. Rojas, Miguel" },
+        { "especialidad": "Medicina Familiar", "profesional": "Dra. Sanchez Luthard, Angeles" },
+        { "especialidad": "Ginecólogo", "profesional": "Dr. Núñez, Emilio" }
+      ]
+    }
+  ],
+  "servicios_permanentes": [
+    { "nombre": "Farmacia", "horario": "Mañana y Tarde", "responsable": "Benitez Norma" },
+    { "nombre": "Vacunatorio", "horario": "07:00 a 13:00 hs", "responsable": "Núñez Diana" },
+    { "nombre": "Control de Signos Vitales", "horario": "07:00 a 14:00 hs" },
+    { "nombre": "Laboratorio", "horario": "Extracciones desde 06:30 hs", "bioquimicos": ["Martínez Cristina", "Benitez César"] },
+    { "nombre": "Consultorio Cesación Tabáquica", "profesional": "Dr. Segura Guillermo", "contacto": "3757 527038" }
+  ],
+  "info_general": {
+    "atencion": "Lunes a Viernes",
+    "rango_horario": "06:00 a 18:00 hs",
+    "modalidad": "Horario corrido"
+  }
+}

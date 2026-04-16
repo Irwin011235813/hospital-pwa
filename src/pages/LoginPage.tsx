@@ -24,9 +24,12 @@ export default function LoginPage() {
             <path d="M16 6v20M6 16h20" stroke="white" strokeWidth="3" strokeLinecap="round"/>
           </svg>
         </div>
-        <h1 className="font-bold text-3xl text-white tracking-tight mb-1">Hospital Municipal</h1>
+        <h1 className="font-bold text-3xl text-white tracking-tight mb-1 text-center max-w-xs mx-auto leading-tight">
+  Hospital Nivel 1 <br /> 
+  <span className="text-2xl opacity-90">Puerto Esperanza Misiones</span>
+</h1>
         <p className="text-brand-300 text-base text-center max-w-xs">
-          Sistema de turnos digitales — sin filas, desde tu celular
+          Información y servicios del hospital desde tu celular
         </p>
       </div>
 

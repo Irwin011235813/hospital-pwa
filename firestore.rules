@@ -1,30 +1,50 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    
+    // --- FUNCIONES DE SEGURIDAD (El "candado") ---
+    
+    function isAuth() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuth() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
 
-    // Helpers
-    function isAuth()    { return request.auth != null; }
-    function uid()       { return request.auth.uid; }
-    function isAdmin()   { return get(/databases/$(database)/documents/users/$(uid())).data.role == 'admin'; }
-    function isOwner(id) { return uid() == id; }
+    // --- REGLAS POR COLECCIÓN ---
 
-    // Users: owner can read/write; admin can read all
+    // Colección de Usuarios: El usuario lee lo suyo, solo Admin ve todo
     match /users/{userId} {
-      allow read:  if isAuth() && (isOwner(userId) || isAdmin());
-      allow write: if isAuth() && (isOwner(userId) || isAdmin());
+      allow read, write: if isAuth() && request.auth.uid == userId;
+      allow read, write: if isAdmin();
     }
 
-    // Appointments: patient reads/creates own; admin reads/updates all
-    match /appointments/{apptId} {
-      allow read:   if isAuth() && (resource.data.patientId == uid() || isAdmin());
-      allow create: if isAuth() && request.resource.data.patientId == uid();
-      allow update: if isAuth() && (resource.data.patientId == uid() || isAdmin());
+    // Colección de Noticias (Conexión Vecinal)
+    match /noticias/{noticiaId} {
+      allow read: if isAuth(); // Todos los vecinos logueados leen
+      allow write: if isAdmin(); // Solo el CM/Admin publica o borra
     }
 
-    // Medical records: patient reads own; admin reads/writes all
-    match /medical_records/{recordId} {
-      allow read:   if isAuth() && (resource.data.patientId == uid() || isAdmin());
-      allow write:  if isAuth() && isAdmin();
+    // Colección de Turnos
+    match /turnos/{turnoId} {
+      // El vecino lee y crea su propio turno. El Admin gestiona todos.
+      allow read, create: if isAuth(); 
+      allow update, delete: if isAdmin();
+    }
+
+    // Colección de Vacunación a Domicilio (NUEVO)
+    match /pedidos_vacuna/{pedidoId} {
+      // El vecino pide su vacuna. Solo el Admin ve la lista para ir a las casas.
+      allow create: if isAuth();
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Colección de Médicos/Cronograma
+    match /especialistas/{espId} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
     }
   }
 }

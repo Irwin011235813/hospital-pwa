@@ -7,7 +7,6 @@ export default function BottomNav() {
 
   const tabs = [
     { id: 'home', icon: Home, label: 'Inicio', path: '/home' },
-    { id: 'turnos', icon: Calendar, label: 'Turnos', path: '/turnos' },
     { id: 'novedades', icon: Megaphone, label: 'Noticias', path: '/novedades' },
   ]
 

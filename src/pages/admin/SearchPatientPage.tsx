@@ -1,7 +1,6 @@
 import { useState } from 'react'
 
 // Rutas corregidas (subiendo dos niveles para llegar a src)
-import { useAuthContext }        from '../../context/AuthContext'
 import { userService }           from '../../services/userService'
 import { medicalRecordService }  from '../../services/medicalRecordService'
 import { PageHeader }            from '../../components/layout/PageHeader'

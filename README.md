@@ -12,18 +12,24 @@ npm install
 # 2. Configurar variables de entorno
 cp .env.example .env.local
 # → Completá con los valores de tu proyecto Firebase
+# → En particular, VITE_FIREBASE_STORAGE_BUCKET debe ser tu bucket, por ejemplo:
+#    hospital-pto-esperanza.appspot.com
 
 # 3. Aplicar reglas de Firestore
 # En Firebase Console → Firestore → Reglas → pegá el contenido de firestore.rules
 
-# 4. Crear el primer usuario admin
+# 4. Configurar CORS de Storage
+# En Firebase Console → Storage → Reglas de CORS o usando gsutil.
+# Usa cors.json como ejemplo para habilitar localhost y tu dominio de Vercel.
+
+# 5. Crear el primer usuario admin
 # Logueate con Google, luego desde Firebase Console
 # editá el documento users/{tu-uid} y cambiá role a "admin"
 
-# 5. Desarrollo
+# 6. Desarrollo
 npm run dev
 
-# 6. Build para producción
+# 7. Build para producción
 npm run build
 ```
 
