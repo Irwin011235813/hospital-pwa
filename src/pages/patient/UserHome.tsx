@@ -96,6 +96,7 @@ export default function UserHome() {
   const user     = auth.currentUser
   const navigate = useNavigate()
   const role = localStorage.getItem('role') || 'patient';
+
   // Redirigir admin a /admin
   if (role === 'admin') {
     navigate('/admin', { replace: true });
@@ -132,8 +133,7 @@ export default function UserHome() {
     navigate('/login', { replace: true })
   }
 
-  // Obtener rol desde localStorage (ajustar si tienes un contexto global)
-  const role = localStorage.getItem('role') || 'patient';
+
 
   return (
     <div className="min-h-screen bg-slate-50 pb-24">
