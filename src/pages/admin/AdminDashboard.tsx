@@ -22,6 +22,7 @@ import {
   Stethoscope, UserX, CheckCircle2, Clock,
   X, Plus, Phone, User, Megaphone, Star,
 } from 'lucide-react'
+import AdminNavBar from '../../components/admin/AdminNavBar'
 
 // Tipos
 import type { Appointment } from '../../types'
@@ -510,6 +511,15 @@ export default function AdminDashboard() {
     navigate('/login', { replace: true })
   }
 
+  // Ref para scrollear al composer
+  const composerRef = useState<HTMLDivElement | null>(null)[0] || (typeof window !== 'undefined' ? document.getElementById('composer-novedad') : null)
+  const goToComposer = () => {
+    setTimeout(() => {
+      const el = document.getElementById('composer-novedad')
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 50)
+  }
+
   useEffect(() => {
     const q = query(collection(db, 'noticias'), orderBy('fecha', 'desc'))
     const unsub = onSnapshot(q, snap => {
@@ -556,6 +566,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="page-root">
+      <AdminNavBar onGoToComposer={goToComposer} onLogout={handleLogout} />
 
       {/* Header con foto y nombre real */}
       <header className="page-header">
@@ -598,6 +609,8 @@ export default function AdminDashboard() {
       </header>
 
       <div className="page-content space-y-4">
+        {/* Composer de novedades (ancla para scroll) */}
+        <div id="composer-novedad"></div>
 
         {/* Composer estilo Facebook */}
         <div className="card-md bg-white border border-slate-200 shadow-sm">
