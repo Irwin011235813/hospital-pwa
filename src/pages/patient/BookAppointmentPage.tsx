@@ -6,7 +6,6 @@ import { auth, db }    from '../../lib/firebase'
 import { useBooking }  from '../../hooks/useBooking'
 
 // EL FIX CLAVE: Sin llaves { } y con puntos
-import BottomNav       from '../../components/layout/BottomNav'
 
 import { Spinner }     from '../../components/ui/Spinner'
 import { Alert }       from '../../components/ui/Alert'
@@ -263,7 +262,7 @@ export default function BookAppointmentPage() {
           </div>
         )}
       </div>
-      <BottomNav />
+      {/* BottomNav eliminado definitivamente */}
     </div>
   )
 }

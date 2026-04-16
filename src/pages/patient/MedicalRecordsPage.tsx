@@ -1,7 +1,6 @@
 import { useAuthContext }     from '@/context/AuthContext'
 import { useMedicalRecords }  from '@/hooks/useMedicalRecords'
 import { PageHeader }         from '@/components/layout/PageHeader'
-import  BottomNav           from '@/components/layout/BottomNav'
 import { EmptyState }         from '@/components/ui/EmptyState'
 import { Spinner }            from '@/components/ui/Spinner'
 import { Lock, ClipboardList, ChevronDown, ChevronUp } from 'lucide-react'
@@ -74,7 +73,7 @@ export default function MedicalRecordsPage() {
           </div>
         )}
       </div>
-      <BottomNav />
+      {/* BottomNav eliminado definitivamente */}
     </div>
   )
 }

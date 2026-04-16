@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { userService }           from '../../services/userService'
 import { medicalRecordService }  from '../../services/medicalRecordService'
 import { PageHeader }            from '../../components/layout/PageHeader'
-import BottomNav                 from '../../components/layout/BottomNav'
 import { Spinner }               from '../../components/ui/Spinner'
 import { Alert }                 from '../../components/ui/Alert'
 
@@ -131,7 +130,7 @@ export default function SearchPatientPage() {
           </div>
         )}
       </div>
-      <BottomNav />
+      {/* BottomNav eliminado definitivamente */}
     </div>
   )
 }
