@@ -10,9 +10,7 @@ import { Swiper, SwiperSlide } from 'swiper/react'
 import { Pagination }          from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/pagination'
-import {
-  LogOut, Smartphone, X, ChevronDown, CalendarDays, Megaphone,
-} from 'lucide-react'
+import { LogOut, Smartphone, X, CalendarDays, Megaphone } from 'lucide-react'
 
 // ── Banner PWA ────────────────────────────────────────────────────────────────
 function PWABanner({ onClose }: { onClose: () => void }) {
@@ -98,7 +96,6 @@ export default function UserHome() {
   const user     = auth.currentUser
   const navigate = useNavigate()
   const role = localStorage.getItem('role') || 'patient';
-
   // Redirigir admin a /admin
   if (role === 'admin') {
     navigate('/admin', { replace: true });
