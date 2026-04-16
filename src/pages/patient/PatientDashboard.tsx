@@ -38,37 +38,24 @@ function SkeletonCard() {
 export default function PatientDashboard() {
   const user     = auth.currentUser
   const navigate = useNavigate()
+  const role = localStorage.getItem('role') || 'patient';
 
-  const { appointments, loading, cancel } = usePatientAppointments(user?.uid)
+  // Redirigir admin a /admin
+  if (role === 'admin') {
+    navigate('/admin', { replace: true });
+    return null;
+  }
 
-  const now = new Date()
-
-  // Proximos: pending/confirmed con fecha futura
-  const upcoming = appointments.filter(a =>  a.status === 'pending' &&
-  new Date(a.dateTime) >= now
-)
-
-  // Historial: atendidos O con fecha pasada
-const past = appointments.filter(a =>
-  a.status === 'completed' ||
-  a.status === 'cancelled' ||
-  (a.status === 'pending' && new Date(a.dateTime) < now)
-)
-
-  const next      = upcoming[0] ?? null
   const firstName = user?.displayName?.split(' ')[0] ?? 'Paciente'
-  const hoy       = format(now, "EEEE d 'de' MMMM", { locale: es })
+  const hoy       = format(new Date(), "EEEE d 'de' MMMM", { locale: es })
 
   const handleLogout = async () => {
     await signOut(auth)
     navigate('/login', { replace: true })
   }
 
-  // Confirm antes de cancelar
-  const handleCancel = async (id: string) => {
-    const ok = window.confirm('¿Seguro que queres cancelar este turno?')
-    if (ok) await cancel(id)
-  }
+  // Obtener rol desde localStorage (ajustar si tienes un contexto global)
+  const role = localStorage.getItem('role') || 'patient';
 
   return (
     <div className="page-root">
@@ -86,7 +73,6 @@ const past = appointments.filter(a =>
       </header>
 
       <div className="page-content space-y-6">
-
         {/* Bienvenida con foto */}
         <div className="card-md bg-blue-800 text-white border-0">
           <div className="flex items-center gap-4">
@@ -110,17 +96,8 @@ const past = appointments.filter(a =>
             </div>
           </div>
         </div>
-
-        {/* Acciones rapidas */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="card flex flex-col items-start gap-3 p-5">
-            <div className="w-10 h-10 rounded-xl bg-blue-800 flex items-center justify-center">
-              <CalendarPlus size={20} className="text-white" strokeWidth={1.8} />
-            </div>
-            <p className="font-semibold text-slate-800 text-sm leading-tight">
-              Agenda y turnos no están disponibles aún
-            </p>
-          </div>
+        {/* Acceso directo a historial médico */}
+        <div className="grid grid-cols-1 gap-3">
           <button
             onClick={() => navigate('/patient/records')}
             className="card flex flex-col items-start gap-3 p-5 transition-shadow
@@ -130,11 +107,10 @@ const past = appointments.filter(a =>
               <ClipboardList size={20} className="text-white" strokeWidth={1.8} />
             </div>
             <p className="font-semibold text-slate-800 text-sm leading-tight">
-              Historial<br/>Medico
+              Historial<br/>Médico
             </p>
           </button>
         </div>
-
         {/* Cronograma de especialistas */}
         <div>
           <div className="flex items-center gap-2 mb-1">
@@ -144,7 +120,6 @@ const past = appointments.filter(a =>
           <p className="text-xs text-slate-500 mb-3">Turno mañana -- 08:00 a 12:00 hs</p>
           <MedicalSchedule />
         </div>
-
       </div>
       <BottomNav />
     </div>
