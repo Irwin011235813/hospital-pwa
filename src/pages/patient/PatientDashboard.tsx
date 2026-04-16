@@ -54,8 +54,7 @@ export default function PatientDashboard() {
     navigate('/login', { replace: true })
   }
 
-  // Obtener rol desde localStorage (ajustar si tienes un contexto global)
-  const role = localStorage.getItem('role') || 'patient';
+
 
   return (
     <div className="page-root">
