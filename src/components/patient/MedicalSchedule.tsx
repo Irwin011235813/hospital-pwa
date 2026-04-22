@@ -106,14 +106,50 @@ const SUGERENCIAS = [
   'Control de presión arterial',
 ]
 
+// ── Normalización: quita acentos, mayúsculas y espacios extra ────────────────
+function normalize(str: string): string {
+  return str
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // quita tildes
+    .replace(/[^a-z0-9\s]/g, '')    // quita caracteres especiales
+    .replace(/\s+/g, ' ')           // colapsa espacios múltiples
+    .trim()
+}
+
+// ── Detectar síntoma con tolerancia ortográfica ───────────────────────────────
 function detectarSintoma(query: string) {
-  const q = query.toLowerCase().trim()
+  const q = normalize(query)
   if (!q) return { esDetectado: false, tip: '', especialidades: [] as string[] }
+
+  // Dividimos la query en palabras individuales para detectar
+  // frases largas e informales como "che mañana ay pediatra x la tarde"
+  const palabras = q.split(' ').filter(p => p.length > 2)
+
   for (const entry of SYMPTOM_MAP) {
-    if (entry.keywords.some(k => q.includes(k))) {
-      return { esDetectado: true, tip: entry.tip, especialidades: entry.specialties }
+    // Normalizamos también cada keyword del mapa
+    const keywordsNorm = entry.keywords.map(k => normalize(k))
+
+    const match = keywordsNorm.some(keyword => {
+      // Coincidencia exacta con la query completa
+      if (q.includes(keyword)) return true
+      // Coincidencia palabra por palabra (detecta frases largas)
+      return palabras.some(palabra => {
+        // Tolerancia: la palabra del usuario incluye la keyword o viceversa
+        // Ej: "estomago" matchea "estómago", "pediatra" matchea "pediatra"
+        return keyword.includes(palabra) || palabra.includes(keyword)
+      })
+    })
+
+    if (match) {
+      return {
+        esDetectado:   true,
+        tip:           entry.tip,
+        especialidades: entry.specialties,
+      }
     }
   }
+
   return { esDetectado: false, tip: '', especialidades: [] as string[] }
 }
 
@@ -182,10 +218,10 @@ export function MedicalSchedule({
       )
       return matches.length > 0 ? matches : byDay
     }
-    const q = searchTerm.toLowerCase().trim()
+    const q = normalize(searchTerm)
     return byDay.filter(e =>
-      e.specialty.toLowerCase().includes(q) ||
-      e.doctorName.toLowerCase().includes(q)
+      normalize(e.specialty).includes(q) ||
+      normalize(e.doctorName).includes(q)
     )
   }, [entries, activeDay, searchTerm, sintoma])
 
