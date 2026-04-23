@@ -82,13 +82,13 @@ const SYMPTOM_MAP: { keywords: string[]; specialties: string[]; tip: string; isS
   {
     keywords: ['panza','pansa','estomago','abdomen','digestion','nauseas','vomito',
                'diarrea','gastritis','intestino','colico','acidez','reflujo'],
-    specialties: ['Clínica Médica','Medicina Gral. / Cirugía','Medicina Familiar'],
+    specialties: ['Clínica Médica','Medicina Gral. / Médico Cirujano','Medicina Familiar'],
     tip: 'Para dolor abdominal o digestivo te recomendamos Clínica Médica o Medicina General.',
   },
   {
     keywords: ['fiebre','gripe','resfrio','resfriado','tos','garganta','congestion',
                'cansancio','debilidad','malestar','escalofrio','cuerpo cortado'],
-    specialties: ['Clínica Médica','Medicina Familiar','Medicina Gral. / Cirugía'],
+    specialties: ['Clínica Médica','Medicina Familiar','Medicina Gral. / Médico Cirujano'],
     tip: 'Para síntomas gripales o fiebre, Medicina General o Clínica Médica pueden atenderte.',
   },
   {
@@ -99,26 +99,26 @@ const SYMPTOM_MAP: { keywords: string[]; specialties: string[]; tip: string; isS
   },
   {
     keywords: ['corazon','pecho','presion alta','taquicardia','arritmia','cardio',
-               'hipertension','latido','pulso alto','palpitacion'],
-    specialties: ['Cardiología'],
+         'hipertension','latido','pulso alto','palpitacion','electrocardiograma','ecg'],
+    specialties: ['Cardiólogo','Electrocardiograma'],
     tip: 'Para síntomas cardíacos o presión alta, Cardiología es la especialidad indicada.',
   },
   {
     keywords: ['mujer','gineco','menstruacion','embarazo','ovario','utero',
-               'mama','pap','ciclo','anticonceptivo','ginecologia'],
-    specialties: ['Ginecología','Ginecología / Ecografías'],
+         'mama','pap','ciclo','anticonceptivo','ginecologia','parto','obstetra'],
+    specialties: ['Ginecólogo','Ecografías','Lic. en Obstetricia'],
     tip: 'Para consultas ginecológicas, el Dr. Núñez o el Dr. Schafer pueden atenderte.',
   },
   {
     keywords: ['ecografia','imagen','radiografia','placa','rx','eco','radiologia',
-               'estudio por imagen'],
-    specialties: ['Radiología','Ginecología / Ecografías'],
+               'radiologo','radiografo','estudio por imagen'],
+    specialties: ['Radiólogo','Radióloga','Ecografías','Ecografía'],
     tip: 'Para estudios por imágenes, Radiología atiende todos los días hábiles.',
   },
   {
     keywords: ['peso','dieta','nutricion','adelgazar','alimentacion','obesidad',
                'colesterol','nutriologa','nutricionista'],
-    specialties: ['Nutrición'],
+    specialties: ['Nutrición','Lic. en Nutrición'],
     tip: 'Para nutrición, Jerkovich Juliana atiende martes, jueves y viernes.',
   },
   {
@@ -128,15 +128,27 @@ const SYMPTOM_MAP: { keywords: string[]; specialties: string[]; tip: string; isS
   },
   {
     keywords: ['espalda','columna','lumbar','cuello','hueso','articulacion','rodilla',
-               'tobillo','fractura','golpe','trauma','lesion','me torci'],
-    specialties: ['Medicina Gral. / Cirugía'],
+         'tobillo','fractura','golpe','trauma','lesion','me torci','traumatologia'],
+    specialties: ['Medicina Gral. / Médico Cirujano','Traumatólogo'],
     tip: 'Para dolores musculares o traumatismos, Medicina General / Cirugía puede ayudarte.',
   },
   {
     keywords: ['cirugia','operacion','quirurgico','herida','punto','sutura','corte'],
-    specialties: ['Medicina Gral. / Cirugía'],
+    specialties: ['Medicina Gral. / Médico Cirujano'],
     tip: 'Para consultas quirúrgicas, el Dr. Rojas atiende de martes a viernes.',
   },
+   {
+     keywords: ['diente','muela','caries','dentista','odonto','limpieza','ortodoncia'],
+     specialties: ['Odontóloga'],
+     tip: 'Para consultas odontológicas, la Dra. Duda atiende los días hábiles.',
+     isService: false,
+   },
+   {
+     keywords: ['psico','ansiedad','depresion','estres','emocional','mental','terapia'],
+     specialties: ['Psicóloga'],
+     tip: 'Para consultas de salud mental, la Dra. Psicóloga está disponible.',
+     isService: false,
+   },
 ]
 
 // ─────────────────────────────────────────────────────────────────────────────
