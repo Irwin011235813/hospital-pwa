@@ -318,33 +318,38 @@ function buildReceptionistResponse(
   morning:     ScheduleEntry[],
   afternoon:   ScheduleEntry[],
 ): ReceptionistResponse {
-  const day        = inference.detectedDay ?? activeDay
-  const dayName    = DAY_LABELS[day] ?? 'este día'
-  const entries    = shift === 'mañana' ? morning : afternoon
-  const dayEntries = entries.filter(e => e.day === day)
+  const day     = inference.detectedDay ?? activeDay
+  const dayName = DAY_LABELS[day] ?? 'este día'
+
+  // Buscar en AMBOS turnos para no perder resultados
+  const allDayEntries = [
+    ...morning.filter(e => e.day === day),
+    ...afternoon.filter(e => e.day === day),
+  ]
 
   if (!inference.hasMatch) {
     return {
       message:     '¿En qué puedo ayudarte?',
-      details:     ['Podés preguntarme por síntomas, especialidades, médicos o servicios del hospital.'],
+      details:     ['Podés preguntarme por síntomas, especialidades, médicos o servicios.'],
       hasSchedule: false,
       suggestion:  'Probá escribir un síntoma como "me duele la panza" o "tengo fiebre".',
     }
   }
 
-  // Buscar médicos que coincidan con las especialidades detectadas
-  const matchingDoctors = dayEntries.filter(e =>
+  // Buscar médicos que coincidan en el día — en cualquier turno
+  const matchingDoctors = allDayEntries.filter(e =>
     inference.specialties.some(sp =>
       normalize(e.specialty).includes(normalize(sp))
     )
   )
 
   if (matchingDoctors.length > 0) {
-    const details = matchingDoctors.map(d =>
-      `${d.doctorName} — ${d.specialty} · ${d.timeRange}`
-    )
+    const details = matchingDoctors.map(d => {
+      const turno = morning.includes(d) ? '(Turno Mañana)' : '(Turno Tarde)'
+      return `${d.doctorName} — ${d.specialty} · ${d.timeRange} ${turno}`
+    })
     return {
-      message:     `Encontré ${matchingDoctors.length > 1 ? 'estos especialistas' : 'este especialista'} para vos el ${dayName}:`,
+      message:     `Encontré ${matchingDoctors.length > 1 ? 'estos especialistas' : 'este especialista'} el ${dayName}:`,
       details,
       hasSchedule: true,
     }
@@ -363,14 +368,13 @@ function buildReceptionistResponse(
       )
     )
     if (found.length > 0) {
-      const name = DAY_LABELS[d]
-      alternatives.push(`${name}: ${found[0].doctorName} · ${found[0].timeRange}`)
+      alternatives.push(`${DAY_LABELS[d]}: ${found[0].doctorName} · ${found[0].timeRange}`)
     }
   }
 
   return {
     message:     `No encontré ${inference.specialties[0] ?? 'esa especialidad'} el ${dayName}.`,
-    details:     ['Tampoco hay turnos para ese día en el turno seleccionado.'],
+    details:     ['No hay turnos para esa especialidad ese día.'],
     hasSchedule: false,
     suggestion:  alternatives.length > 0
       ? `Disponible en: ${alternatives.slice(0, 2).join(' | ')}`
