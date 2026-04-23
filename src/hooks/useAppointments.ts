@@ -47,10 +47,12 @@ export function usePatientAppointments(patientId: string | undefined) {
 export function useDayAppointments(isoDate: string) {
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [loading,      setLoading]      = useState(true)
+  const [error,        setError]        = useState<string | null>(null)
 
   useEffect(() => {
     if (!isoDate) return
     setLoading(true)
+    setError(null)
 
     const start = `${isoDate}T00:00:00.000Z`
     const end   = `${isoDate}T23:59:59.999Z`
@@ -69,6 +71,7 @@ export function useDayAppointments(isoDate: string) {
       },
       (err) => {
         console.error('[useDayAppointments]', err)
+        setError('No se pudieron cargar los turnos del día.')
         setLoading(false)
       }
     )
@@ -86,5 +89,5 @@ export function useDayAppointments(isoDate: string) {
     })
   }, [])
 
-  return { appointments, loading, updateStatus, saveNote }
+  return { appointments, loading, error, updateStatus, saveNote }
 }

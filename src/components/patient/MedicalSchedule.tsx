@@ -94,7 +94,7 @@ const SYMPTOM_MAP: { keywords: string[]; specialties: string[]; tip: string; isS
   {
     keywords: ['nino','bebe','hijo','hija','chico','menor','pediatra','pediatria',
                'crecimiento','chiquito','peque','infante'],
-    specialties: ['Pediatría'],
+    specialties: ['Pediatra'],
     tip: 'Para consultas pediátricas, la Dra. Peña y el Dr. Cogorno están disponibles.',
   },
   {
@@ -312,10 +312,18 @@ function buildResponse(
   const dayName = DAY_LABELS[day] ?? 'ese día'
 
   const morningIds    = new Set(morning.map(e => e.id))
-  const allDayEntries = [
+  
+  // Filtrar por turno detectado si fue especificado
+  let allDayEntries = [
     ...morning.filter(e => e.day === day),
     ...afternoon.filter(e => e.day === day),
   ]
+  
+  if (inf.detectedShift === 'mañana') {
+    allDayEntries = morning.filter(e => e.day === day)
+  } else if (inf.detectedShift === 'tarde') {
+    allDayEntries = afternoon.filter(e => e.day === day)
+  }
 
   const matches = allDayEntries.filter(e =>
     inf.specialties.some(sp => normalize(e.specialty).includes(normalize(sp)))

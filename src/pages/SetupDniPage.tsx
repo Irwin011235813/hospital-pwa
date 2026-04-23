@@ -20,13 +20,18 @@ export default function SetupDniPage() {
   }
 
   const handleSave = async () => {
+    if (!user) {
+      setError('Sesión expirada. Por favor inicia sesión nuevamente.')
+      return
+    }
+
     const clean = dni.trim()
     const err   = validarDni(clean)
     if (err) { setError(err); return }
 
     setLoading(true); setError('')
     try {
-      await setDoc(doc(db, 'users', user!.uid), { dni: clean }, { merge: true })
+      await setDoc(doc(db, 'users', user.uid), { dni: clean }, { merge: true })
       navigate('/patient', { replace: true })
     } catch {
       setError('No se pudo guardar. Intenta de nuevo.')

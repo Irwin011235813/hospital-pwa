@@ -42,7 +42,7 @@ export default function App() {
         try {
           const snap = await getDoc(doc(db, 'users', fbUser.uid))
           console.log('[App] auth uid:', fbUser.uid, 'user doc exists:', snap.exists(), 'data:', snap.data())
-          if (snap.exists()) setRole(snap.data().role ?? 'patient')
+          if (snap.exists()) setRole(snap.data()?.role ?? 'patient')
         } catch (err) {
           console.error('[App] error reading user role:', err)
           setRole('patient')

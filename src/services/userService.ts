@@ -9,8 +9,17 @@ const COL = 'users'
 
 export const userService = {
   async getById(uid: string): Promise<AppUser | null> {
-    const snap = await getDoc(doc(db, COL, uid))
-    return snap.exists() ? (snap.data() as AppUser) : null
+    try {
+      const snap = await getDoc(doc(db, COL, uid))
+      if (!snap.exists()) return null
+      const data = snap.data()
+      // Validar estructura mínima
+      if (!data?.uid || !data?.email) return null
+      return data as AppUser
+    } catch (err) {
+      console.error('[userService.getById]', err)
+      return null
+    }
   },
 
   async upsert(data: Partial<AppUser> & { uid: string }): Promise<void> {
@@ -22,9 +31,17 @@ export const userService = {
   },
 
   async findByDni(dni: string): Promise<AppUser | null> {
-    const q    = query(collection(db, COL), where('dni', '==', dni))
-    const snap = await getDocs(q)
-    if (snap.empty) return null
-    return snap.docs[0].data() as AppUser
+    try {
+      const q    = query(collection(db, COL), where('dni', '==', dni))
+      const snap = await getDocs(q)
+      if (snap.empty) return null
+      const data = snap.docs[0].data()
+      // Validar estructura mínima
+      if (!data?.uid || !data?.email) return null
+      return data as AppUser
+    } catch (err) {
+      console.error('[userService.findByDni]', err)
+      return null
+    }
   },
 }
