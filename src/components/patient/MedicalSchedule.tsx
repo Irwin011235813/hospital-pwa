@@ -205,15 +205,45 @@ const DAY_KEYWORD_MAP: { keywords: string[]; dayIndex: number }[] = [
   { keywords: ['jueves','jueve','juev'],          dayIndex: 4 },
   { keywords: ['viernes','viernte','vier','vie'], dayIndex: 5 },
   { keywords: ['hoy','ahora','este dia'],         dayIndex: new Date().getDay() === 0 || new Date().getDay() === 6 ? 1 : new Date().getDay() },
-  { keywords: ['manana','ayer'],                  dayIndex: -1 }, // manejado por lógica de shift
+  // --- ENTRADAS DINÁMICAS DE DÍAS ---
+  // (Las entradas de "mañana" y "pasado mañana" se agregan abajo)
 ]
 
 type Shift = 'mañana' | 'tarde'
 
 const SHIFT_KEYWORDS: { keywords: string[]; shift: Shift }[] = [
-  { keywords: ['manana','mainan','por la manana','turno manana','temprano','matutino','am'], shift: 'mañana' },
-  { keywords: ['tarde','por la tarde','turno tarde','vespertino','pm','noche'],              shift: 'tarde'  },
+  {
+    keywords: ['por la manana','turno manana','turno de manana',
+               'a la manana','temprano','matutino',' am '],
+    shift: 'mañana',
+  },
+  {
+    keywords: ['por la tarde','turno tarde','turno de tarde',
+               'a la tarde','vespertino',' pm ','de tarde'],
+    shift: 'tarde',
+  },
 ]
+// Entradas dinámicas para "mañana" y "pasado mañana"
+DAY_KEYWORD_MAP.push(
+  {
+    keywords: ['manana','mañana','dema','el jueves que viene'],
+    dayIndex: (() => {
+      const d = new Date()
+      d.setDate(d.getDate() + 1)
+      const next = d.getDay()
+      return next >= 1 && next <= 5 ? next : 1
+    })()
+  },
+  {
+    keywords: ['pasado manana','pasado mañana'],
+    dayIndex: (() => {
+      const d = new Date()
+      d.setDate(d.getDate() + 2)
+      const next = d.getDay()
+      return next >= 1 && next <= 5 ? next : 1
+    })()
+  }
+)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 4. MOTOR DE INFERENCIA SEMÁNTICA
