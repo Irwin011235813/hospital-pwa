@@ -344,7 +344,6 @@ interface ReceptionistResponse {
 function buildReceptionistResponse(
   inference:   InferenceResult,
   activeDay:   number,
-  shift:       Shift,
   morning:     ScheduleEntry[],
   afternoon:   ScheduleEntry[],
 ): ReceptionistResponse {
@@ -353,18 +352,18 @@ function buildReceptionistResponse(
 
   // Buscar en AMBOS turnos para no perder resultados
   const allDayEntries = [
-    ...morning.filter(e => e.day === day),
-    ...afternoon.filter(e => e.day === day),
+          ...morning.filter(e => e.day === day),
+          ...afternoon.filter(e => e.day === day),
   ]
 
-  if (!inference.hasMatch) {
-    return {
-      message:     '¿En qué puedo ayudarte?',
-      details:     ['Podés preguntarme por síntomas, especialidades, médicos o servicios.'],
-      hasSchedule: false,
-      suggestion:  'Probá escribir un síntoma como "me duele la panza" o "tengo fiebre".',
-    }
-  }
+        if (!inference.hasMatch) {
+          return {
+            message:     '¿En qué puedo ayudarte?',
+            details:     ['Podés preguntarme por síntomas, especialidades o médicos.'],
+            hasSchedule: false,
+            suggestion:  'Probá: "tengo fiebre", "hay pediatra hoy", "análisis de sangre".',
+          }
+        }
 
   // Buscar médicos que coincidan en el día — en cualquier turno
   const matchingDoctors = allDayEntries.filter(e =>
@@ -375,7 +374,8 @@ function buildReceptionistResponse(
 
   if (matchingDoctors.length > 0) {
     const details = matchingDoctors.map(d => {
-      const turno = morning.includes(d) ? '(Turno Mañana)' : '(Turno Tarde)'
+      const isMorning = morning.includes(d)
+      const turno = isMorning ? '· Turno Mañana' : '· Turno Tarde'
       return `${d.doctorName} — ${d.specialty} · ${d.timeRange} ${turno}`
     })
     return {
@@ -492,7 +492,7 @@ export function MedicalSchedule({
 
   const receptionist = useMemo(() =>
     showResult
-      ? buildReceptionistResponse(inference, activeDay, shift, morningEntries, afternoonEntries)
+      ? buildReceptionistResponse(inference, activeDay, morningEntries, afternoonEntries)
       : null,
   [inference, activeDay, shift, showResult, morningEntries, afternoonEntries])
 
