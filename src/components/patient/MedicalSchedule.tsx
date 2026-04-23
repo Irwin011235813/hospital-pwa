@@ -1,3 +1,83 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// CONCIENCIA DEL TIEMPO REAL
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Parsea "06:00 - 10:30" → { start: 360, end: 630 } en minutos desde medianoche */
+function parseTimeRange(timeRange: string): { start: number; end: number } | null {
+  const match = timeRange.match(/(\d{1,2}):(\d{2})\s*[-a]\s*(\d{1,2}):(\d{2})/)
+  if (!match) return null
+  const start = parseInt(match[1]) * 60 + parseInt(match[2])
+  const end   = parseInt(match[3]) * 60 + parseInt(match[4])
+  return { start, end }
+}
+
+/** Minutos actuales desde medianoche */
+function nowInMinutes(): number {
+  const now = new Date()
+  return now.getHours() * 60 + now.getMinutes()
+}
+
+/** Formatea minutos → "08:30 hs" */
+function formatMinutes(m: number): string {
+  const hh = String(Math.floor(m / 60)).padStart(2, '0')
+  const mm = String(m % 60).padStart(2, '0')
+  return `${hh}:${mm} hs`
+}
+
+interface TimeAwarenessResult {
+  isAsking:         boolean   // ¿el usuario preguntó por hora actual?
+  doctorsNow:       ScheduleEntry[]  // médicos que atienden AHORA
+  nextDoctor:       ScheduleEntry | null  // próximo médico del día
+  minutesUntilNext: number | null
+  currentTimeStr:   string   // "21:46 hs"
+  isAfterHours:     boolean  // si no hay nadie ahora
+}
+
+const TIME_KEYWORDS = [
+  'ahora','esta hora','a esta hora','en este momento','hoy a las',
+  'hay doctor','hay medico','quien atiende','quien esta','guardia',
+  'turno ahora','atienden ahora','hay alguien','hay atencion',
+]
+
+function analyzeTimeQuery(
+  query: string,
+  allEntries: ScheduleEntry[],
+  todayIndex: number,
+): TimeAwarenessResult {
+  const q      = normalize(query)
+  const isAsking = TIME_KEYWORDS.some(k => q.includes(normalize(k)))
+  const now    = nowInMinutes()
+  const nowStr = formatMinutes(now)
+
+  const todayEntries = allEntries.filter(e => e.day === todayIndex)
+
+  // Médicos que atienden AHORA mismo
+  const doctorsNow = todayEntries.filter(e => {
+    const range = parseTimeRange(e.timeRange)
+    if (!range) return false
+    return now >= range.start && now <= range.end
+  })
+
+  // Próximo médico del día (el que empieza después de ahora)
+  const upcoming = todayEntries
+    .map(e => ({ e, range: parseTimeRange(e.timeRange) }))
+    .filter(({ range }) => range !== null && range.start > now)
+    .sort((a, b) => a.range!.start - b.range!.start)
+
+  const nextDoctor       = upcoming[0]?.e ?? null
+  const minutesUntilNext = upcoming[0]?.range?.start
+    ? upcoming[0].range.start - now
+    : null
+
+  return {
+    isAsking,
+    doctorsNow,
+    nextDoctor,
+    minutesUntilNext,
+    currentTimeStr:   nowStr,
+    isAfterHours:     doctorsNow.length === 0,
+  }
+}
 import { useMemo, useState, useEffect, useRef } from 'react'
 import {
   MORNING_SCHEDULE,
@@ -400,6 +480,17 @@ export function MedicalSchedule({
     )
   }, [entries, activeDay, searchTerm, inference])
 
+
+  const allTodayEntries = useMemo(
+    () => [...morningEntries, ...afternoonEntries],
+    [morningEntries, afternoonEntries]
+  )
+
+  const timeAnalysis = useMemo(
+    () => analyzeTimeQuery(searchTerm, allTodayEntries, today),
+    [searchTerm, allTodayEntries, today]
+  )
+
   const days = [1, 2, 3, 4, 5] as const
 
   return (
@@ -543,24 +634,25 @@ export function MedicalSchedule({
         )}
 
         {/* ── TARJETA RECEPCIONISTA ── */}
-        {receptionist && showResult && (
+        {/* ── TARJETA RECEPCIONISTA ── */}
+        {showResult && (receptionist || timeAnalysis.isAsking) && (
           <div className="mt-4 rounded-2xl border border-violet-200 overflow-hidden slide-down shadow-md">
             {/* Header */}
-            <div className="bg-gradient-to-r from-violet-600 to-cyan-600 px-4 py-3
-                            flex items-center gap-3">
+            <div className="bg-gradient-to-r from-violet-600 to-cyan-600 px-4 py-3 flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
                 <Bot size={20} className="text-white" />
               </div>
               <div>
                 <p className="text-white font-bold text-sm">Asistente del Hospital</p>
                 <p className="text-white/70 text-[11px]">
-                  {inference.rawMatches.length > 0
-                    ? `Detecté: ${inference.rawMatches.slice(0,3).join(', ')}`
-                    : 'Analizando tu consulta'
+                  {timeAnalysis.isAsking
+                    ? `Consultando disponibilidad · ${timeAnalysis.currentTimeStr}`
+                    : inference.rawMatches.length > 0
+                      ? `Detecté: ${inference.rawMatches.slice(0, 3).join(', ')}`
+                      : 'Analizando tu consulta'
                   }
                 </p>
               </div>
-              {/* Indicador de auto-filtro */}
               {(inference.detectedDay !== null || inference.detectedShift !== null) && (
                 <div className="ml-auto flex items-center gap-1 bg-white/20 rounded-full px-2.5 py-1">
                   <Sparkles size={11} className="text-white" />
@@ -571,36 +663,129 @@ export function MedicalSchedule({
 
             {/* Body */}
             <div className="bg-white px-4 py-4">
-              <p className="text-slate-800 font-semibold text-sm mb-3">
-                {receptionist.message}
-              </p>
 
-              {receptionist.details.map((d, i) => (
-                <div key={i}
-                  className={`flex items-start gap-2.5 py-2.5 text-sm
-                    ${i < receptionist.details.length - 1 ? 'border-b border-slate-100' : ''}`}>
-                  <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 mt-0.5
-                    ${receptionist.hasSchedule
-                      ? 'bg-gradient-to-br from-violet-500 to-cyan-500'
-                      : 'bg-slate-100'}`}>
-                    {receptionist.hasSchedule
-                      ? <Stethoscope size={12} className="text-white" />
-                      : <Info size={12} className="text-slate-400" />
-                    }
+              {/* RESPUESTA DE HORA ACTUAL */}
+              {timeAnalysis.isAsking && (
+                <div className="mb-4">
+                  {/* Hora actual destacada */}
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center">
+                      <Clock size={16} className="text-white" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 font-medium">Hora actual</p>
+                      <p className="text-xl font-black text-slate-900 leading-none font-mono">
+                        {timeAnalysis.currentTimeStr}
+                      </p>
+                    </div>
                   </div>
-                  <span className={receptionist.hasSchedule ? 'text-slate-800 font-medium' : 'text-slate-500'}>
-                    {d}
-                  </span>
-                </div>
-              ))}
 
-              {receptionist.suggestion && (
-                <div className="mt-3 flex items-start gap-2 p-3 bg-amber-50 rounded-xl border border-amber-200">
-                  <AlertCircle size={15} className="text-amber-600 mt-0.5 shrink-0" />
-                  <p className="text-amber-700 text-xs font-medium leading-relaxed">
-                    {receptionist.suggestion}
-                  </p>
+                  {/* Médicos atendiendo AHORA */}
+                  {timeAnalysis.doctorsNow.length > 0 ? (
+                    <div>
+                      <p className="text-sm font-bold text-emerald-700 mb-2 flex items-center gap-1.5">
+                        <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        Atendiendo ahora mismo:
+                      </p>
+                      {timeAnalysis.doctorsNow.map(d => (
+                        <div key={d.id}
+                          className="flex items-center gap-3 p-3 rounded-xl bg-emerald-50 border border-emerald-200 mb-2">
+                          <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                            {d.doctorName.split(' ').find(w => !['Dr.','Dra.'].includes(w))?.charAt(0)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-emerald-900 text-sm truncate">
+                              {d.doctorName}
+                            </p>
+                            <p className="text-emerald-700 text-xs">{d.specialty}</p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <p className="text-xs font-bold text-emerald-800 font-mono">
+                              {d.timeRange}
+                            </p>
+                            <p className="text-[10px] text-emerald-600">En consultorio</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 mb-3">
+                      <p className="text-slate-700 text-sm font-semibold">
+                        No hay médicos en consultorio a las {timeAnalysis.currentTimeStr}.
+                      </p>
+                      <p className="text-slate-500 text-xs mt-1">
+                        El hospital atiende de Lunes a Viernes de 06:00 a 18:00 hs en horario corrido.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Próximo médico */}
+                  {timeAnalysis.nextDoctor && (
+                    <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-xl border border-blue-200 mb-2">
+                      <AlertCircle size={15} className="text-blue-600 mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-blue-800 text-xs font-bold">Próximo turno del día</p>
+                        <p className="text-blue-700 text-sm font-medium mt-0.5">
+                          {timeAnalysis.nextDoctor.doctorName} — {timeAnalysis.nextDoctor.specialty}
+                        </p>
+                        <p className="text-blue-600 text-xs font-mono mt-0.5">
+                          {timeAnalysis.nextDoctor.timeRange}
+                          {timeAnalysis.minutesUntilNext !== null && timeAnalysis.minutesUntilNext < 120 && (
+                            <span className="ml-2 text-blue-500">
+                              (en {timeAnalysis.minutesUntilNext} minutos)
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Guardia siempre disponible */}
+                  <div className="flex items-center gap-2 p-3 bg-amber-50 rounded-xl border border-amber-200">
+                    <HeartPulse size={15} className="text-amber-600 shrink-0" />
+                    <div>
+                      <p className="text-amber-800 text-xs font-bold">Guardia disponible</p>
+                      <p className="text-amber-700 text-xs">
+                        Para emergencias, la Guardia del hospital está disponible las 24 hs.
+                      </p>
+                    </div>
+                  </div>
                 </div>
+              )}
+
+              {/* RESPUESTA DE SÍNTOMA (solo si no es query de hora) */}
+              {!timeAnalysis.isAsking && receptionist && (
+                <>
+                  <p className="text-slate-800 font-semibold text-sm mb-3">
+                    {receptionist.message}
+                  </p>
+                  {receptionist.details.map((d, i) => (
+                    <div key={i}
+                      className={`flex items-start gap-2.5 py-2.5 text-sm
+                        ${i < receptionist.details.length - 1 ? 'border-b border-slate-100' : ''}`}>
+                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 mt-0.5
+                        ${receptionist.hasSchedule
+                          ? 'bg-gradient-to-br from-violet-500 to-cyan-500'
+                          : 'bg-slate-100'}`}>
+                        {receptionist.hasSchedule
+                          ? <Stethoscope size={12} className="text-white" />
+                          : <Info size={12} className="text-slate-400" />
+                        }
+                      </div>
+                      <span className={receptionist.hasSchedule ? 'text-slate-800 font-medium' : 'text-slate-500'}>
+                        {d}
+                      </span>
+                    </div>
+                  ))}
+                  {receptionist.suggestion && (
+                    <div className="mt-3 flex items-start gap-2 p-3 bg-amber-50 rounded-xl border border-amber-200">
+                      <AlertCircle size={15} className="text-amber-600 mt-0.5 shrink-0" />
+                      <p className="text-amber-700 text-xs font-medium leading-relaxed">
+                        {receptionist.suggestion}
+                      </p>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
