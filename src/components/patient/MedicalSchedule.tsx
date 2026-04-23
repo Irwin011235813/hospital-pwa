@@ -13,7 +13,7 @@ import {
 } from 'lucide-react'
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 1. NORMALIZACIÓN
+// NORMALIZACIÓN
 // ─────────────────────────────────────────────────────────────────────────────
 function normalize(str: string): string {
   return str
@@ -26,32 +26,64 @@ function normalize(str: string): string {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 2. HELPERS DE TIEMPO
+// HELPERS DE TIEMPO
 // ─────────────────────────────────────────────────────────────────────────────
 function parseTimeRange(t: string): { start: number; end: number } | null {
   const m = t.match(/(\d{1,2}):(\d{2})\s*[-a]\s*(\d{1,2}):(\d{2})/)
   if (!m) return null
-  return {
-    start: parseInt(m[1]) * 60 + parseInt(m[2]),
-    end:   parseInt(m[3]) * 60 + parseInt(m[4]),
-  }
+  return { start: parseInt(m[1]) * 60 + parseInt(m[2]), end: parseInt(m[3]) * 60 + parseInt(m[4]) }
 }
-function nowMinutes() {
-  const n = new Date(); return n.getHours() * 60 + n.getMinutes()
-}
+function nowMinutes() { const n = new Date(); return n.getHours() * 60 + n.getMinutes() }
 function fmtMin(m: number) {
   return `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')} hs`
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 3. MAPA SEMÁNTICO
+// MAPA SEMÁNTICO — síntomas + servicios permanentes
 // ─────────────────────────────────────────────────────────────────────────────
-const SYMPTOM_MAP: { keywords: string[]; specialties: string[]; tip: string }[] = [
+const SYMPTOM_MAP: { keywords: string[]; specialties: string[]; tip: string; isService?: boolean }[] = [
+  // ── Servicios permanentes (detectados primero para prioridad) ──
+  {
+    keywords: ['farmacia','remedio','medicamento','pastilla','receta','medicacion',
+               'donde compro','donde retiro'],
+    specialties: ['Farmacia'],
+    tip: 'La Farmacia atiende de Lunes a Viernes mañana y tarde.',
+    isService: true,
+  },
+  {
+    keywords: ['laboratorio','analisis','sangre','orina','extraccion','glucosa',
+               'hemograma','hacerme un analisis','estudio de sangre'],
+    specialties: ['Laboratorio'],
+    tip: 'El Laboratorio realiza extracciones a partir de las 6:30 hs.',
+    isService: true,
+  },
+  {
+    keywords: ['vacunatorio','vacuna','vacunacion','aplicar vacuna','vacunar',
+               'inmunizacion','me vacuno'],
+    specialties: ['Vacunatorio'],
+    tip: 'El Vacunatorio atiende de Lunes a Viernes de 7:00 a 13:00 hs. Encargada: Núñez Diana.',
+    isService: true,
+  },
+  {
+    keywords: ['signos vitales','tension','presion arterial','glucometria',
+               'temperatura','pulso','control de presion'],
+    specialties: ['Control de Signos Vitales'],
+    tip: 'Control de Signos Vitales funciona de Lunes a Viernes de 7:00 a 14:00 hs.',
+    isService: true,
+  },
+  {
+    keywords: ['fumar','cigarro','cigarrillo','tabaco','dejar de fumar',
+               'cesacion','nicotina','tabaquismo'],
+    specialties: ['Cesación Tabáquica'],
+    tip: 'El Consultorio de Cesación Tabáquica es atendido por el Dr. Segura.',
+    isService: true,
+  },
+  // ── Especialidades médicas ──
   {
     keywords: ['panza','pansa','estomago','abdomen','digestion','nauseas','vomito',
                'diarrea','gastritis','intestino','colico','acidez','reflujo'],
     specialties: ['Clínica Médica','Medicina Gral. / Cirugía','Medicina Familiar'],
-    tip: 'Para dolor abdominal o problemas digestivos te recomendamos Clínica Médica o Medicina General.',
+    tip: 'Para dolor abdominal o digestivo te recomendamos Clínica Médica o Medicina General.',
   },
   {
     keywords: ['fiebre','gripe','resfrio','resfriado','tos','garganta','congestion',
@@ -61,12 +93,12 @@ const SYMPTOM_MAP: { keywords: string[]; specialties: string[]; tip: string }[] 
   },
   {
     keywords: ['nino','bebe','hijo','hija','chico','menor','pediatra','pediatria',
-               'vacunacion','crecimiento','chiquito','peque'],
+               'crecimiento','chiquito','peque','infante'],
     specialties: ['Pediatría'],
-    tip: 'Para consultas pediátricas, la Dra. Peña y el Dr. Cogorno están disponibles en Pediatría.',
+    tip: 'Para consultas pediátricas, la Dra. Peña y el Dr. Cogorno están disponibles.',
   },
   {
-    keywords: ['corazon','pecho','presion','taquicardia','arritmia','cardio',
+    keywords: ['corazon','pecho','presion alta','taquicardia','arritmia','cardio',
                'hipertension','latido','pulso alto','palpitacion'],
     specialties: ['Cardiología'],
     tip: 'Para síntomas cardíacos o presión alta, Cardiología es la especialidad indicada.',
@@ -78,41 +110,16 @@ const SYMPTOM_MAP: { keywords: string[]; specialties: string[]; tip: string }[] 
     tip: 'Para consultas ginecológicas, el Dr. Núñez o el Dr. Schafer pueden atenderte.',
   },
   {
-    keywords: ['ecografia','imagen','radiografia','placa','rx','eco','radiologia'],
+    keywords: ['ecografia','imagen','radiografia','placa','rx','eco','radiologia',
+               'estudio por imagen'],
     specialties: ['Radiología','Ginecología / Ecografías'],
-    tip: 'Para estudios por imágenes y ecografías, Radiología atiende todos los días hábiles.',
+    tip: 'Para estudios por imágenes, Radiología atiende todos los días hábiles.',
   },
   {
     keywords: ['peso','dieta','nutricion','adelgazar','alimentacion','obesidad',
                'colesterol','nutriologa','nutricionista'],
     specialties: ['Nutrición'],
     tip: 'Para nutrición, Jerkovich Juliana atiende martes, jueves y viernes.',
-  },
-  {
-    keywords: ['fumar','cigarro','cigarrillo','tabaco','dejar de fumar','cesacion','nicotina'],
-    specialties: ['Cesación Tabáquica'],
-    tip: 'Para dejar de fumar, el Dr. Segura atiende en Cesación Tabáquica.',
-  },
-  {
-    keywords: ['vacuna','vacunacion','aplicar vacuna','vacunar','inmunizacion'],
-    specialties: ['Vacunatorio'],
-    tip: 'El Vacunatorio atiende de Lunes a Viernes de 7:00 a 13:00 hs.',
-  },
-  {
-    keywords: ['analisis','laboratorio','sangre','orina','extraccion','glucosa',
-               'hemograma','hacerme un analisis'],
-    specialties: ['Laboratorio'],
-    tip: 'Las extracciones son a partir de las 6:30 hs. Programá tu turno.',
-  },
-  {
-    keywords: ['tension','presion arterial','signos vitales','glucometria','temperatura','pulso'],
-    specialties: ['Control de Signos Vitales'],
-    tip: 'Control de Signos Vitales funciona de Lunes a Viernes de 7:00 a 14:00 hs.',
-  },
-  {
-    keywords: ['remedio','medicamento','farmacia','pastilla','receta','medicacion'],
-    specialties: ['Farmacia'],
-    tip: 'La Farmacia atiende de Lunes a Viernes mañana y tarde.',
   },
   {
     keywords: ['cabeza','dolor de cabeza','migrana','mareo','vertigo','jaqueca'],
@@ -133,66 +140,53 @@ const SYMPTOM_MAP: { keywords: string[]; specialties: string[]; tip: string }[] 
 ]
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 4. RESOLUCIÓN DE DÍA
-//    PRIORIDAD: días específicos > "mañana" > "hoy"
-//    "mañana" = próximo día hábil
+// RESOLUCIÓN DE DÍA Y TURNO
 // ─────────────────────────────────────────────────────────────────────────────
-function nextWorkday(offsetDays: number): number {
-  const d = new Date()
-  d.setDate(d.getDate() + offsetDays)
-  const w = d.getDay()
-  if (w === 0) return 1   // domingo → lunes
-  if (w === 6) return 1   // sábado → lunes
-  return w
+function nextWorkday(offset: number): number {
+  const d = new Date(); d.setDate(d.getDate() + offset)
+  const w = d.getDay(); if (w === 0 || w === 6) return 1; return w
 }
-
 function todayWorkday(): number {
-  const w = new Date().getDay()
-  if (w === 0 || w === 6) return 1
-  return w
+  const w = new Date().getDay(); return (w === 0 || w === 6) ? 1 : w
 }
 
-// Mapa en orden de PRIORIDAD (días específicos primero)
+type Shift = 'mañana' | 'tarde'
+
 const DAY_RULES: { test: (q: string) => boolean; resolve: () => number }[] = [
-  { test: q => /\blunes\b/.test(q) || q.includes('lune'),    resolve: () => 1 },
-  { test: q => /\bmartes\b/.test(q) || q.includes('mart'),   resolve: () => 2 },
-  { test: q => q.includes('miercole') || q.includes('mierc'),resolve: () => 3 },
-  { test: q => /\bjueves\b/.test(q) || q.includes('jueve'),  resolve: () => 4 },
-  { test: q => /\bviernes\b/.test(q) || q.includes('vier'),  resolve: () => 5 },
-  // "mañana" como DÍA — solo si NO es "por la mañana" / "turno mañana"
+  { test: q => /\blunes\b/.test(q) || q.includes('lune'),     resolve: () => 1 },
+  { test: q => /\bmartes\b/.test(q) || q.includes('mart'),    resolve: () => 2 },
+  { test: q => q.includes('miercole') || q.includes('mierc'), resolve: () => 3 },
+  { test: q => /\bjueves\b/.test(q) || q.includes('jueve'),   resolve: () => 4 },
+  { test: q => /\bviernes\b/.test(q) || q.includes('vier'),   resolve: () => 5 },
   {
+    // "mañana" como día SOLO si no es turno mañana
     test: q => {
       const hasTomorrow = q.includes('manana') || q.includes('mañana')
-      const isShift     = q.includes('por la manana') || q.includes('turno manana') ||
-                          q.includes('a la manana') || q.includes('de manana')
+      const isShift = ['por la manana','turno manana','a la manana','de manana',
+                       'por la mañana','turno mañana'].some(k => q.includes(k))
       return hasTomorrow && !isShift
     },
     resolve: () => nextWorkday(1),
   },
-  { test: q => q.includes('pasado manana'), resolve: () => nextWorkday(2) },
+  { test: q => q.includes('pasado manana') || q.includes('pasado mañana'), resolve: () => nextWorkday(2) },
   { test: q => q.includes('hoy') || q.includes('este dia'), resolve: () => todayWorkday() },
 ]
 
-// Mapa de TURNO (mañana/tarde)
-type Shift = 'mañana' | 'tarde'
-
 const SHIFT_RULES: { test: (q: string) => boolean; shift: Shift }[] = [
   {
-    test: q => q.includes('por la manana') || q.includes('turno manana') ||
-               q.includes('a la manana')   || q.includes('de manana') ||
-               q.includes('temprano')      || q.includes('matutino'),
+    test: q => ['por la manana','turno manana','a la manana','de manana','temprano','matutino',
+                'por la mañana','turno mañana'].some(k => q.includes(k)),
     shift: 'mañana',
   },
   {
-    test: q => q.includes('por la tarde') || q.includes('turno tarde') ||
-               q.includes('a la tarde')   || q.includes('de tarde') ||
-               q.includes('vespertino'),
+    test: q => ['por la tarde','turno tarde','a la tarde','de tarde','vespertino',
+                'tarde'].some(k => q.includes(k)),
     shift: 'tarde',
   },
 ]
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 5. MOTOR DE INFERENCIA
+// MOTOR DE INFERENCIA
 // ─────────────────────────────────────────────────────────────────────────────
 interface InferenceResult {
   specialties:   string[]
@@ -200,6 +194,7 @@ interface InferenceResult {
   detectedDay:   number | null
   detectedShift: Shift | null
   hasMatch:      boolean
+  isService:     boolean   // ← nuevo: indica si es servicio permanente
   confidence:    number
   rawMatches:    string[]
 }
@@ -208,13 +203,13 @@ function runInference(query: string): InferenceResult {
   const q     = normalize(query)
   const words = q.split(' ').filter(w => w.length > 2)
 
-  if (!q) return { specialties:[], tip:'', detectedDay:null,
-                   detectedShift:null, hasMatch:false, confidence:0, rawMatches:[] }
+  if (!q) return { specialties:[], tip:'', detectedDay:null, detectedShift:null,
+                   hasMatch:false, isService:false, confidence:0, rawMatches:[] }
 
-  // Especialidades
   let bestSpecs: string[] = []
-  let bestTip = ''
-  let score   = 0
+  let bestTip   = ''
+  let bestIsService = false
+  let score = 0
   const raw: string[] = []
 
   for (const entry of SYMPTOM_MAP) {
@@ -226,16 +221,19 @@ function runInference(query: string): InferenceResult {
         if (kw.includes(w) || w.includes(kw)) { s += 1; raw.push(w); break }
       }
     }
-    if (s > score) { score = s; bestSpecs = entry.specialties; bestTip = entry.tip }
+    if (s > score) {
+      score = s
+      bestSpecs = entry.specialties
+      bestTip   = entry.tip
+      bestIsService = entry.isService ?? false
+    }
   }
 
-  // Día — recorre en prioridad (días específicos primero)
   let detectedDay: number | null = null
   for (const rule of DAY_RULES) {
     if (rule.test(q)) { detectedDay = rule.resolve(); break }
   }
 
-  // Turno
   let detectedShift: Shift | null = null
   for (const rule of SHIFT_RULES) {
     if (rule.test(q)) { detectedShift = rule.shift; break }
@@ -247,13 +245,18 @@ function runInference(query: string): InferenceResult {
     detectedDay,
     detectedShift,
     hasMatch:      score > 0,
+    isService:     bestIsService,
     confidence:    Math.min(100, score * 30 + (detectedDay ? 15:0) + (detectedShift ? 10:0)),
     rawMatches:    [...new Set(raw)],
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 6. RECEPCIONISTA
+// GENERADOR DE RESPUESTA
+// Orden de búsqueda:
+//   1. Si es servicio permanente → buscar en PERMANENT_SERVICES
+//   2. Si es especialidad médica → buscar en turnos del día (ambos turnos)
+//   3. Si no hay en ese día → sugerir alternativas en otros días
 // ─────────────────────────────────────────────────────────────────────────────
 interface ReceptionistResponse {
   message:     string
@@ -267,19 +270,48 @@ function buildResponse(
   activeDay: number,
   morning:   ScheduleEntry[],
   afternoon: ScheduleEntry[],
+  services:  PermanentService[],
 ): ReceptionistResponse {
   if (!inf.hasMatch) return {
     message:     '¿En qué puedo ayudarte?',
-    details:     ['Podés preguntarme por síntomas, especialidades o médicos.'],
+    details:     ['Podés preguntarme por síntomas, especialidades, servicios o médicos.'],
     hasSchedule: false,
-    suggestion:  'Probá: "hay pediatra hoy", "tengo fiebre", "análisis de sangre".',
+    suggestion:  'Probá: "hay farmacia hoy", "hay pediatra mañana", "análisis de sangre".',
   }
 
+  // ── 1. SERVICIOS PERMANENTES ──────────────────────────────────────────────
+  // Si el motor detectó que es un servicio (farmacia, lab, vacunatorio, etc.)
+  // buscamos en PERMANENT_SERVICES SIN importar el día ni el turno
+  if (inf.isService) {
+    const matching = services.filter(svc =>
+      inf.specialties.some(sp =>
+        normalize(svc.name).includes(normalize(sp)) ||
+        normalize(sp).includes(normalize(svc.name))
+      )
+    )
+
+    if (matching.length > 0) {
+      const svc = matching[0]
+      const details: string[] = [svc.schedule]
+      if (svc.responsible)  details.push(`Encargada/o: ${svc.responsible}`)
+      if (svc.professional) details.push(`Profesional: ${svc.professional}`)
+      if (svc.contact)      details.push(`Contacto: ${svc.contact}`)
+      if (svc.details && svc.detailLabel)
+        details.push(`${svc.detailLabel}: ${svc.details.join(', ')}`)
+
+      return {
+        message:     `Sí, ${svc.name} está disponible:`,
+        details,
+        hasSchedule: true,
+      }
+    }
+  }
+
+  // ── 2. TURNOS MÉDICOS ─────────────────────────────────────────────────────
   const day     = inf.detectedDay ?? activeDay
   const dayName = DAY_LABELS[day] ?? 'ese día'
 
-  // Buscar en AMBOS turnos del día usando id (no referencia de objeto)
-  const morningIds   = new Set(morning.map(e => e.id))
+  const morningIds    = new Set(morning.map(e => e.id))
   const allDayEntries = [
     ...morning.filter(e => e.day === day),
     ...afternoon.filter(e => e.day === day),
@@ -295,14 +327,14 @@ function buildResponse(
       return `${d.doctorName} · ${d.specialty} · ${d.timeRange} (${turno})`
     })
     return {
-      message:     `Sí, hay ${matches.length > 1 ? 'especialistas' : 'atención'} el ${dayName}:`,
+      message:     `Sí, hay atención el ${dayName}:`,
       details,
       hasSchedule: true,
     }
   }
 
-  // Alternativas en otros días
-  const all = [...morning, ...afternoon]
+  // ── 3. ALTERNATIVAS EN OTROS DÍAS ────────────────────────────────────────
+  const all  = [...morning, ...afternoon]
   const alts: string[] = []
   for (let d = 1; d <= 5; d++) {
     if (d === day) continue
@@ -315,7 +347,7 @@ function buildResponse(
 
   return {
     message:     `No hay ${inf.specialties[0] ?? 'esa especialidad'} el ${dayName}.`,
-    details:     ['No encontré turnos para esa especialidad en ese día.'],
+    details:     ['No encontré turnos para esa especialidad ese día.'],
     hasSchedule: false,
     suggestion:  alts.length > 0
       ? `Disponible en: ${alts.slice(0,2).join(' | ')}`
@@ -324,18 +356,16 @@ function buildResponse(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 7. ANÁLISIS DE HORA ACTUAL
+// ANÁLISIS HORA ACTUAL
 // ─────────────────────────────────────────────────────────────────────────────
-const TIME_KW = ['ahora','esta hora','a esta hora','en este momento','hoy a las',
-                 'hay doctor','hay medico','quien atiende','quien esta','guardia',
-                 'turno ahora','atienden ahora','hay alguien','hay atencion']
+const TIME_KW = ['ahora','esta hora','a esta hora','en este momento','hay doctor',
+                 'hay medico','quien atiende','quien esta','guardia','turno ahora',
+                 'hay alguien','hay atencion','atiende ahora','atienden']
 
 interface TimeResult {
-  isAsking:         boolean
-  doctorsNow:       ScheduleEntry[]
-  nextDoctor:       ScheduleEntry | null
-  minutesUntilNext: number | null
-  currentTimeStr:   string
+  isAsking: boolean; doctorsNow: ScheduleEntry[]
+  nextDoctor: ScheduleEntry | null; minutesUntilNext: number | null
+  currentTimeStr: string
 }
 
 function analyzeTime(query: string, entries: ScheduleEntry[], todayIdx: number): TimeResult {
@@ -345,8 +375,7 @@ function analyzeTime(query: string, entries: ScheduleEntry[], todayIdx: number):
   const today    = entries.filter(e => e.day === todayIdx)
 
   const doctorsNow = today.filter(e => {
-    const r = parseTimeRange(e.timeRange)
-    return r ? now >= r.start && now <= r.end : false
+    const r = parseTimeRange(e.timeRange); return r ? now >= r.start && now <= r.end : false
   })
 
   const upcoming = today
@@ -355,8 +384,7 @@ function analyzeTime(query: string, entries: ScheduleEntry[], todayIdx: number):
     .sort((a, b) => a.r!.start - b.r!.start)
 
   return {
-    isAsking,
-    doctorsNow,
+    isAsking, doctorsNow,
     nextDoctor:       upcoming[0]?.e ?? null,
     minutesUntilNext: upcoming[0]?.r ? upcoming[0].r.start - now : null,
     currentTimeStr:   fmtMin(now),
@@ -369,25 +397,23 @@ function analyzeTime(query: string, entries: ScheduleEntry[], todayIdx: number):
 const SUGERENCIAS = [
   '¿Hay pediatra hoy?',
   '¿Hay pediatra mañana?',
-  '¿Qué hago si tengo mucha tos?',
-  '¿Cuándo puedo hacerme un análisis?',
+  '¿Hay farmacia hoy?',
+  '¿A qué hora abre el laboratorio?',
+  '¿Qué hago si tengo fiebre?',
   'Me duele la panza',
-  '¿Hay médico el martes?',
-  'Quiero dejar de fumar',
-  '¿Hay doctor ahora?',
+  '¿Hay médico ahora?',
+  'Quiero vacunarme',
 ]
 
 const SERVICE_ICONS: Record<string, typeof Pill> = {
-  Farmacia:                         Pill,
-  Vacunatorio:                      Syringe,
-  'Control de Signos Vitales':      HeartPulse,
-  Laboratorio:                      FlaskConical,
+  Farmacia: Pill, Vacunatorio: Syringe,
+  'Control de Signos Vitales': HeartPulse,
+  Laboratorio: FlaskConical,
   'Consultorio Cesacion Tabaquica': Wind,
 }
 
 function getDayIndex(): number {
-  const d = new Date().getDay()
-  return d >= 1 && d <= 5 ? d : 1
+  const d = new Date().getDay(); return (d >= 1 && d <= 5) ? d : 1
 }
 
 interface Props {
@@ -426,8 +452,11 @@ export function MedicalSchedule({
     const timer = setTimeout(() => {
       setIsTyping(false); setShowResult(true)
       const inf = runInference(searchTerm)
-      if (inf.detectedDay   !== null) setActiveDay(inf.detectedDay)
-      if (inf.detectedShift !== null) setShift(inf.detectedShift)
+      // Solo mover tabs si NO es un servicio permanente
+      if (!inf.isService) {
+        if (inf.detectedDay   !== null) setActiveDay(inf.detectedDay)
+        if (inf.detectedShift !== null) setShift(inf.detectedShift)
+      }
     }, 800)
     return () => clearTimeout(timer)
   }, [searchTerm])
@@ -436,8 +465,10 @@ export function MedicalSchedule({
   const inference = useMemo(() => runInference(searchTerm), [searchTerm])
 
   const receptionist = useMemo(() =>
-    showResult ? buildResponse(inference, activeDay, morningEntries, afternoonEntries) : null,
-    [inference, activeDay, showResult, morningEntries, afternoonEntries]
+    showResult
+      ? buildResponse(inference, activeDay, morningEntries, afternoonEntries, permanentServices)
+      : null,
+    [inference, activeDay, showResult, morningEntries, afternoonEntries, permanentServices]
   )
 
   const allEntries = useMemo(
@@ -453,12 +484,14 @@ export function MedicalSchedule({
   const filtered = useMemo(() => {
     const byDay = entries.filter(e => e.day === activeDay)
     if (!searchTerm.trim()) return byDay
-    if (inference.hasMatch) {
+    if (inference.hasMatch && !inference.isService) {
       const m = byDay.filter(e =>
         inference.specialties.some(sp => normalize(e.specialty).includes(normalize(sp)))
       )
-      return m.length > 0 ? m : byDay
+      // Si no hay matches NO mostrar todos — mostrar lista vacía para no confundir
+      return m
     }
+    if (inference.isService) return byDay // servicios no filtran el cronograma
     const q = normalize(searchTerm)
     return byDay.filter(e =>
       normalize(e.specialty).includes(q) || normalize(e.doctorName).includes(q)
@@ -494,7 +527,6 @@ export function MedicalSchedule({
           </h2>
         </div>
 
-        {/* Input */}
         <div className={`relative rounded-2xl transition-all duration-300 ${focused ? 'glow-on' : 'glow-idle'}`}>
           <div className="absolute left-3.5 top-1/2 -translate-y-1/2 z-10">
             {isTyping ? (
@@ -511,7 +543,7 @@ export function MedicalSchedule({
           <input
             ref={inputRef}
             type="text"
-            placeholder="¿Qué síntoma tenés? ¿Hay pediatra mañana? ¿Hay médico ahora?"
+            placeholder="¿Hay farmacia? ¿Hay pediatra mañana? ¿Hay médico ahora?"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             onFocus={() => setFocused(true)}
@@ -535,7 +567,6 @@ export function MedicalSchedule({
           </div>
         </div>
 
-        {/* Barra confianza */}
         {showResult && inference.hasMatch && (
           <div className="mt-2 slide-down">
             <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
@@ -545,7 +576,6 @@ export function MedicalSchedule({
           </div>
         )}
 
-        {/* Burbujas */}
         {!searchTerm && (
           <div className="mt-3 flex flex-wrap gap-2">
             {SUGERENCIAS.map((s,i) => (
@@ -555,8 +585,7 @@ export function MedicalSchedule({
                            hover:border-violet-300 hover:text-violet-700 hover:bg-violet-50
                            transition-all active:scale-95 shadow-sm"
                 style={{animationDelay:`${i*.05}s`}}>
-                <Sparkles size={10} className="text-violet-400" />
-                {s}
+                <Sparkles size={10} className="text-violet-400" />{s}
               </button>
             ))}
           </div>
@@ -576,11 +605,10 @@ export function MedicalSchedule({
                     ? `Disponibilidad · ${timeAnalysis.currentTimeStr}`
                     : inference.rawMatches.length > 0
                       ? `Detecté: ${inference.rawMatches.slice(0,3).join(', ')}`
-                      : 'Analizando consulta'
-                  }
+                      : 'Analizando consulta'}
                 </p>
               </div>
-              {(inference.detectedDay !== null || inference.detectedShift !== null) && (
+              {(inference.detectedDay !== null || inference.detectedShift !== null) && !inference.isService && (
                 <div className="ml-auto flex items-center gap-1 bg-white/20 rounded-full px-2.5 py-1">
                   <Sparkles size={11} className="text-white" />
                   <span className="text-white text-[10px] font-bold">Filtros actualizados</span>
@@ -589,7 +617,6 @@ export function MedicalSchedule({
             </div>
 
             <div className="bg-white px-4 py-4">
-              {/* Respuesta de hora */}
               {timeAnalysis.isAsking && (
                 <div className="mb-2">
                   <div className="flex items-center gap-2 mb-3">
@@ -601,7 +628,6 @@ export function MedicalSchedule({
                       <p className="text-xl font-black text-slate-900 font-mono">{timeAnalysis.currentTimeStr}</p>
                     </div>
                   </div>
-
                   {timeAnalysis.doctorsNow.length > 0 ? (
                     <div>
                       <p className="text-sm font-bold text-emerald-700 mb-2 flex items-center gap-1.5">
@@ -626,23 +652,16 @@ export function MedicalSchedule({
                     </div>
                   ) : (
                     <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 mb-3">
-                      <p className="text-slate-700 text-sm font-semibold">
-                        No hay médicos en consultorio a las {timeAnalysis.currentTimeStr}.
-                      </p>
-                      <p className="text-slate-500 text-xs mt-1">
-                        El hospital atiende de Lunes a Viernes de 06:00 a 18:00 hs.
-                      </p>
+                      <p className="text-slate-700 text-sm font-semibold">No hay médicos en consultorio a las {timeAnalysis.currentTimeStr}.</p>
+                      <p className="text-slate-500 text-xs mt-1">El hospital atiende de Lunes a Viernes de 06:00 a 18:00 hs.</p>
                     </div>
                   )}
-
                   {timeAnalysis.nextDoctor && (
                     <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-xl border border-blue-200 mb-2">
                       <AlertCircle size={15} className="text-blue-600 mt-0.5 shrink-0" />
                       <div>
                         <p className="text-blue-800 text-xs font-bold">Próximo turno del día</p>
-                        <p className="text-blue-700 text-sm font-medium mt-0.5">
-                          {timeAnalysis.nextDoctor.doctorName} — {timeAnalysis.nextDoctor.specialty}
-                        </p>
+                        <p className="text-blue-700 text-sm font-medium mt-0.5">{timeAnalysis.nextDoctor.doctorName} — {timeAnalysis.nextDoctor.specialty}</p>
                         <p className="text-blue-600 text-xs font-mono mt-0.5">
                           {timeAnalysis.nextDoctor.timeRange}
                           {timeAnalysis.minutesUntilNext !== null && timeAnalysis.minutesUntilNext < 120 && (
@@ -652,7 +671,6 @@ export function MedicalSchedule({
                       </div>
                     </div>
                   )}
-
                   <div className="flex items-center gap-2 p-3 bg-amber-50 rounded-xl border border-amber-200">
                     <HeartPulse size={15} className="text-amber-600 shrink-0" />
                     <div>
@@ -663,7 +681,6 @@ export function MedicalSchedule({
                 </div>
               )}
 
-              {/* Respuesta de síntoma/día */}
               {!timeAnalysis.isAsking && receptionist && (
                 <>
                   <p className="text-slate-800 font-semibold text-sm mb-3">{receptionist.message}</p>
@@ -671,16 +688,12 @@ export function MedicalSchedule({
                     <div key={i} className={`flex items-start gap-2.5 py-2.5 text-sm
                       ${i < receptionist.details.length-1 ? 'border-b border-slate-100' : ''}`}>
                       <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 mt-0.5
-                        ${receptionist.hasSchedule
-                          ? 'bg-gradient-to-br from-violet-500 to-cyan-500'
-                          : 'bg-slate-100'}`}>
+                        ${receptionist.hasSchedule ? 'bg-gradient-to-br from-violet-500 to-cyan-500' : 'bg-slate-100'}`}>
                         {receptionist.hasSchedule
                           ? <Stethoscope size={12} className="text-white" />
                           : <Info size={12} className="text-slate-400" />}
                       </div>
-                      <span className={receptionist.hasSchedule ? 'text-slate-800 font-medium' : 'text-slate-500'}>
-                        {d}
-                      </span>
+                      <span className={receptionist.hasSchedule ? 'text-slate-800 font-medium' : 'text-slate-500'}>{d}</span>
                     </div>
                   ))}
                   {receptionist.suggestion && (
@@ -695,13 +708,12 @@ export function MedicalSchedule({
           </div>
         )}
 
-        {/* Tags mientras tipea */}
         {inference.hasMatch && !showResult && isTyping && (
           <div className="mt-2 flex flex-wrap gap-1.5">
             {inference.specialties.slice(0,3).map(sp => (
               <span key={sp} className="inline-flex items-center gap-1 px-2 py-1 rounded-full
                          bg-violet-50 border border-violet-200 text-violet-700 text-xs font-medium">
-                <Stethoscope size={10} />{sp}
+                <Stethoscope size={10}/>{sp}
               </span>
             ))}
           </div>
@@ -712,25 +724,24 @@ export function MedicalSchedule({
       <div className="mb-4 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
         <nav className="flex min-w-max sm:min-w-0" role="tablist">
           {days.map(d => {
-            const isActive   = d === activeDay
-            const autoSel    = inference.detectedDay === d && showResult
-            const mCount     = morningEntries.filter(e => e.day === d).length
-            const tCount     = afternoonEntries.filter(e => e.day === d).length
+            const isActive = d === activeDay
+            const autoSel  = inference.detectedDay === d && showResult && !inference.isService
+            const mCount   = morningEntries.filter(e => e.day === d).length
+            const tCount   = afternoonEntries.filter(e => e.day === d).length
             return (
               <button key={d} role="tab" aria-selected={isActive} onClick={() => setActiveDay(d)}
                 className={`relative flex min-w-[80px] flex-1 flex-col items-center gap-0.5
                             border-b-2 px-2 py-3.5 text-xs font-medium transition-all
                             sm:min-w-0 sm:px-4 sm:py-3 sm:text-sm
                   ${isActive
-                    ? autoSel
-                      ? 'border-violet-600 text-violet-800 bg-violet-50/40'
-                      : 'border-blue-700 text-blue-800 bg-blue-50/30'
+                    ? autoSel ? 'border-violet-600 text-violet-800 bg-violet-50/40'
+                              : 'border-blue-700 text-blue-800 bg-blue-50/30'
                     : 'border-transparent text-slate-500 hover:border-slate-300 hover:bg-slate-50'}`}>
                 <span className="truncate">{DAY_LABELS[d]}</span>
                 <span className={`text-[10px] font-bold ${isActive ? autoSel ? 'text-violet-500' : 'text-blue-600' : 'text-slate-400'}`}>
                   {mCount + tCount}
                 </span>
-                {autoSel && isActive && <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-violet-500" />}
+                {autoSel && isActive && <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-violet-500"/>}
               </button>
             )
           })}
@@ -740,19 +751,18 @@ export function MedicalSchedule({
       {/* SWITCH TURNO */}
       <div className="mb-6 flex gap-1.5 rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm">
         {(['mañana','tarde'] as const).map(s => {
-          const autoSel = inference.detectedShift === s && showResult
+          const autoSel = inference.detectedShift === s && showResult && !inference.isService
           return (
             <button key={s} onClick={() => setShift(s)}
               className={`flex-1 rounded-lg py-3.5 text-sm font-bold transition-all active:scale-[0.98]
                 ${shift === s
-                  ? autoSel
-                    ? 'bg-gradient-to-r from-violet-600 to-cyan-600 text-white shadow-md'
-                    : 'bg-gradient-to-r from-blue-700 to-blue-600 text-white shadow-md'
+                  ? autoSel ? 'bg-gradient-to-r from-violet-600 to-cyan-600 text-white shadow-md'
+                            : 'bg-gradient-to-r from-blue-700 to-blue-600 text-white shadow-md'
                   : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
               <div className="flex flex-col items-center gap-0.5">
                 <div className="flex items-center gap-1">
                   <span>{s === 'mañana' ? 'Mañana' : 'Tarde'}</span>
-                  {autoSel && shift === s && <Sparkles size={12} className="text-white/80" />}
+                  {autoSel && shift === s && <Sparkles size={12} className="text-white/80"/>}
                 </div>
                 <span className={`text-[10px] font-medium ${shift === s ? 'text-white/70' : 'text-slate-400'}`}>
                   Desde las {s === 'mañana' ? '08:00' : '13:00'} hs
@@ -768,7 +778,7 @@ export function MedicalSchedule({
         <CalendarDays size={15} className="text-slate-400" />
         <h3 className="text-sm font-semibold text-slate-700">
           {DAY_LABELS[activeDay]} — {shift === 'mañana' ? 'Mañana' : 'Tarde'}
-          {inference.hasMatch && showResult && (
+          {inference.hasMatch && showResult && !inference.isService && (
             <span className="ml-2 text-violet-500 text-xs font-normal">· especialistas recomendados</span>
           )}
         </h3>
@@ -781,7 +791,6 @@ export function MedicalSchedule({
         </div>
       ) : (
         <div className="mb-6 space-y-3">
-          {/* Desktop */}
           <div className="hidden overflow-hidden rounded-xl border border-slate-200 bg-white sm:block">
             <table className="w-full text-left text-sm">
               <thead>
@@ -793,24 +802,24 @@ export function MedicalSchedule({
               </thead>
               <tbody>
                 {filtered.map(e => {
-                  const rec = inference.hasMatch && inference.specialties.some(sp =>
+                  const rec = inference.hasMatch && !inference.isService && inference.specialties.some(sp =>
                     normalize(e.specialty).includes(normalize(sp)))
                   return (
                     <tr key={e.id} className={`border-b border-slate-100 transition-colors last:border-b-0
                       ${rec ? 'bg-violet-50/40 hover:bg-violet-50' : 'hover:bg-slate-50'}`}>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          {rec && <Sparkles size={13} className="text-violet-500 shrink-0" />}
-                          <Stethoscope size={14} className="text-slate-400 shrink-0" />
+                          {rec && <Sparkles size={13} className="text-violet-500 shrink-0"/>}
+                          <Stethoscope size={14} className="text-slate-400 shrink-0"/>
                           <span className={`font-semibold text-sm ${rec ? 'text-violet-900' : 'text-slate-900'}`}>{e.specialty}</span>
                         </div>
                       </td>
                       <td className="px-4 py-3 text-slate-700 text-sm">
-                        <div className="flex items-center gap-2"><User size={13} className="text-slate-400" />{e.doctorName}</div>
+                        <div className="flex items-center gap-2"><User size={13} className="text-slate-400"/>{e.doctorName}</div>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1.5 text-slate-600 text-sm">
-                          <Clock size={13} className="text-slate-400" />{e.timeRange}
+                          <Clock size={13} className="text-slate-400"/>{e.timeRange}
                         </div>
                         {e.note && <div className="mt-1 flex items-center gap-1 text-[11px] text-slate-400"><Info size={10}/>{e.note}</div>}
                       </td>
@@ -821,23 +830,22 @@ export function MedicalSchedule({
             </table>
           </div>
 
-          {/* Mobile */}
           <div className="grid grid-cols-1 gap-3 sm:hidden">
             {filtered.map(e => {
-              const rec = inference.hasMatch && inference.specialties.some(sp =>
+              const rec = inference.hasMatch && !inference.isService && inference.specialties.some(sp =>
                 normalize(e.specialty).includes(normalize(sp)))
               return (
                 <div key={e.id} className={`w-full rounded-xl border p-4 shadow-sm
                   ${rec ? 'border-violet-300 bg-gradient-to-br from-violet-50/60 to-cyan-50/30' : 'border-slate-200 bg-white'}`}>
                   {rec && (
                     <div className="flex items-center gap-1.5 mb-3 px-2.5 py-1.5 bg-gradient-to-r from-violet-500 to-cyan-500 rounded-lg w-fit">
-                      <Sparkles size={12} className="text-white" />
+                      <Sparkles size={12} className="text-white"/>
                       <span className="text-white text-xs font-bold">Recomendado</span>
                     </div>
                   )}
                   <div className="mb-3 flex items-center gap-2.5">
                     <div className={`rounded-lg p-2 ${rec ? 'bg-gradient-to-br from-violet-500 to-cyan-500 text-white' : 'bg-blue-50 text-blue-700'}`}>
-                      <Stethoscope size={18} />
+                      <Stethoscope size={18}/>
                     </div>
                     <div>
                       <h4 className={`font-bold ${rec ? 'text-violet-900' : 'text-slate-900'}`}>{e.specialty}</h4>
@@ -870,14 +878,17 @@ export function MedicalSchedule({
       {/* SERVICIOS PERMANENTES */}
       <div className="mt-2">
         <div className="mb-3 flex items-center gap-2">
-          <HeartPulse size={15} className="text-slate-400" />
+          <HeartPulse size={15} className="text-slate-400"/>
           <h3 className="text-sm font-semibold text-slate-700">Servicios Permanentes</h3>
         </div>
         <div className="grid grid-cols-1 gap-3">
           {permanentServices.map(svc => {
             const Icon = SERVICE_ICONS[svc.name] ?? Info
-            const rec  = inference.hasMatch && inference.specialties.some(sp =>
-              normalize(svc.name).includes(normalize(sp)))
+            const rec  = inference.hasMatch && inference.isService &&
+              inference.specialties.some(sp =>
+                normalize(svc.name).includes(normalize(sp)) ||
+                normalize(sp).includes(normalize(svc.name))
+              )
             return (
               <div key={svc.name} className={`w-full rounded-xl border p-4 shadow-sm
                 ${rec ? 'border-violet-300 bg-violet-50/30' : 'border-slate-200 bg-white'}`}>
