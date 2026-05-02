@@ -176,26 +176,7 @@ export default function UserHome() {
           pagination={{ clickable: true }}
           className="pb-8"
         >
-          {/* Slide 1: Novedades */}
-          <SwiperSlide>
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-blue-50 rounded-lg text-blue-700">
-                  <Megaphone size={20} />
-                </div>
-                <div>
-                  <h2 className="font-bold text-slate-900 text-lg">Novedades</h2>
-                  <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Información del hospital</p>
-                </div>
-              </div>
-              <NewsFeed
-                items={noticias as any}
-                loading={loading}
-              />
-            </div>
-          </SwiperSlide>
-
-          {/* Slide 2: Cronograma */}
+          {/* Slide 1: Cronograma */}
           <SwiperSlide>
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
               <div className="flex items-center gap-3 mb-4">
@@ -216,6 +197,25 @@ export default function UserHome() {
                 La agenda de especialidades se publica aquí cuando el servicio vuelve a estar disponible.
               </div>
               </div>
+            </div>
+          </SwiperSlide>
+
+          {/* Slide 2: Novedades */}
+          <SwiperSlide>
+            <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-blue-50 rounded-lg text-blue-700">
+                  <Megaphone size={20} />
+                </div>
+                <div>
+                  <h2 className="font-bold text-slate-900 text-lg">Novedades</h2>
+                  <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Información del hospital</p>
+                </div>
+              </div>
+              <NewsFeed
+                items={noticias as any}
+                loading={loading}
+              />
             </div>
           </SwiperSlide>
         </Swiper>
