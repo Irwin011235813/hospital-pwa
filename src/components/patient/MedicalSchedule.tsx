@@ -547,7 +547,7 @@ export function MedicalSchedule({
           </h2>
         </div>
 
-        <div className={`relative rounded-2xl transition-all duration-300 ${focused ? 'glow-on' : 'glow-idle'}`}>
+        <div className={`relative rounded-2xl transition-all duration-300 ${focused ? 'glow-on' : ''}`}>
           <div className="absolute left-3.5 top-1/2 -translate-y-1/2 z-10">
             {isTyping ? (
               <div className="flex items-center gap-[3px] h-5">
@@ -570,7 +570,7 @@ export function MedicalSchedule({
             onBlur={() => setFocused(false)}
             className="w-full pl-11 pr-28 py-3.5 rounded-2xl border-2 bg-[#FAF9F6] text-sm
                        text-slate-900 placeholder:text-slate-400 focus:outline-none
-                       transition-all duration-300 border-[#8B4513]/20 focus:border-[#B0793A]"
+                       transition-all duration-300 border-slate-200 focus:border-[#B0793A]"
           />
           <div className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center gap-2">
             {isTyping && (
@@ -751,14 +751,14 @@ export function MedicalSchedule({
             return (
               <button key={d} role="tab" aria-selected={isActive} onClick={() => setActiveDay(d)}
                 className={`relative flex min-w-[80px] flex-1 flex-col items-center gap-0.5
-                            border-b-2 px-2 py-3.5 text-xs font-medium transition-all
-                            sm:min-w-0 sm:px-4 sm:py-3 sm:text-sm
+                            border-b-2 px-3 py-3.5 text-xs font-medium transition-all
+                            sm:min-w-0 sm:px-6 sm:py-3 sm:text-sm
                   ${isActive
                     ? autoSel ? 'border-[#8B4513] text-[#2D5A27] bg-[#F3ECE6]'
                               : 'border-[#8B4513] text-[#2D5A27] bg-[#FAF9F6]'
                     : 'border-transparent text-slate-500 hover:border-[#8B4513]/40 hover:bg-[#F7F3EE]'}`}>
                 <span className="truncate">{DAY_LABELS[d]}</span>
-                <span className={`text-[10px] font-bold ${isActive ? 'text-[#2D5A27]' : 'text-slate-400'}`}>
+                <span className={`text-[10px] font-bold ${isActive ? 'text-[#B0793A]' : 'text-[#C4A484]'}`}>
                   {mCount + tCount}
                 </span>
                 {autoSel && isActive && <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-[#8B4513]"/>}

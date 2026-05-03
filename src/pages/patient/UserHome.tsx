@@ -139,22 +139,22 @@ export default function UserHome() {
     <div className="min-h-screen bg-slate-50 pb-24">
 
       {/* Header */}
-      <header className="bg-white border-b border-slate-100 px-4 py-3 sticky top-0 z-40">
+      <header className="bg-gradient-to-r from-[#2D5A27]/18 via-[#E9F1E8] to-[#FAF9F6] border-b border-[#8B4513]/20 px-4 py-3 sticky top-0 z-40">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             {user?.photoURL ? (
               <img src={user.photoURL} alt={firstName}
                 className="w-9 h-9 rounded-xl object-cover border border-slate-200" />
             ) : (
-              <div className="w-9 h-9 rounded-xl bg-blue-800 flex items-center justify-center">
+              <div className="w-9 h-9 rounded-xl bg-[#2D5A27] flex items-center justify-center">
                 <span className="text-sm font-bold text-white">
                   {firstName.charAt(0).toUpperCase()}
                 </span>
               </div>
             )}
             <div>
-              <p className="font-semibold text-slate-900 text-sm">Hola, {firstName}</p>
-              <p className="text-xs text-slate-400">Hospital Puerto Esperanza</p>
+              <p className="font-semibold text-[#2D5A27] text-sm">Hola, {firstName}</p>
+              <p className="text-xs text-[#8B4513]/70">Hospital Puerto Esperanza</p>
             </div>
           </div>
           <button onClick={handleLogout} className="btn-ghost btn-icon">
