@@ -555,16 +555,11 @@ export function MedicalSchedule({
 
   const weekTabs = useMemo(() => {
     const now = new Date()
-    const monday = new Date(now)
-    const diffToMonday = (now.getDay() + 6) % 7
-    monday.setDate(now.getDate() - diffToMonday)
-
-    const order = [1, 2, 3, 4, 5, 6, 0]
-    return order.map((day, index) => {
-      const date = new Date(monday)
-      date.setDate(monday.getDate() + index)
+    return Array.from({ length: 7 }, (_, index) => {
+      const date = new Date(now)
+      date.setDate(now.getDate() + index)
       return {
-        day,
+        day: date.getDay(),
         dateLabel: date.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' }),
       }
     })
