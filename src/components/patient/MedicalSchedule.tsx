@@ -154,17 +154,20 @@ const SYMPTOM_MAP: { keywords: string[]; specialties: string[]; tip: string; isS
 // ─────────────────────────────────────────────────────────────────────────────
 // RESOLUCIÓN DE DÍA Y TURNO
 // ─────────────────────────────────────────────────────────────────────────────
-function nextWorkday(offset: number): number {
-  const d = new Date(); d.setDate(d.getDate() + offset)
-  const w = d.getDay(); if (w === 0 || w === 6) return 1; return w
+function nextCalendarDay(offset: number): number {
+  const d = new Date()
+  d.setDate(d.getDate() + offset)
+  return d.getDay()
 }
-function todayWorkday(): number {
-  const w = new Date().getDay(); return (w === 0 || w === 6) ? 1 : w
+function todayIndex(): number {
+  return new Date().getDay()
 }
 
 type Shift = 'mañana' | 'tarde'
 
 const DAY_RULES: { test: (q: string) => boolean; resolve: () => number }[] = [
+  { test: q => q.includes('sabado') || q.includes('sábado'), resolve: () => 6 },
+  { test: q => q.includes('domingo'), resolve: () => 0 },
   { test: q => /\blunes\b/.test(q) || q.includes('lune'),     resolve: () => 1 },
   { test: q => /\bmartes\b/.test(q) || q.includes('mart'),    resolve: () => 2 },
   { test: q => q.includes('miercole') || q.includes('mierc'), resolve: () => 3 },
@@ -178,10 +181,10 @@ const DAY_RULES: { test: (q: string) => boolean; resolve: () => number }[] = [
                        'por la mañana','turno mañana'].some(k => q.includes(k))
       return hasTomorrow && !isShift
     },
-    resolve: () => nextWorkday(1),
+    resolve: () => nextCalendarDay(1),
   },
-  { test: q => q.includes('pasado manana') || q.includes('pasado mañana'), resolve: () => nextWorkday(2) },
-  { test: q => q.includes('hoy') || q.includes('este dia'), resolve: () => todayWorkday() },
+  { test: q => q.includes('pasado manana') || q.includes('pasado mañana'), resolve: () => nextCalendarDay(2) },
+  { test: q => q.includes('hoy') || q.includes('este dia'), resolve: () => todayIndex() },
 ]
 
 const SHIFT_RULES: { test: (q: string) => boolean; shift: Shift }[] = [
@@ -323,6 +326,33 @@ function buildResponse(
   const day     = inf.detectedDay ?? activeDay
   const dayName = DAY_LABELS[day] ?? 'ese día'
 
+  if (day === 0 || day === 6) {
+    const all = [...morning, ...afternoon]
+    const nextWeekday = [1, 2, 3, 4, 5]
+      .map(d => ({
+        day: d,
+        match: all.find(e =>
+          e.day === d &&
+          inf.specialties.some(sp => normalize(e.specialty).includes(normalize(sp)))
+        ),
+      }))
+      .find(x => Boolean(x.match))
+
+    return {
+      message:     `El ${dayName} solo funciona la guardia 24 hs.`,
+      details:     nextWeekday?.match
+        ? [
+            `Para ${inf.specialties[0] ?? 'esa especialidad'}, los consultorios vuelven el ${DAY_LABELS[nextWeekday.day]}.`,
+            `${nextWeekday.match.doctorName} · ${nextWeekday.match.specialty} · ${nextWeekday.match.timeRange}`,
+          ]
+        : ['La guardia del hospital funciona las 24 horas para urgencias.'],
+      hasSchedule: true,
+      suggestion:  nextWeekday?.match
+        ? `Si querés, te muestro otras opciones de ${inf.specialties[0] ?? 'especialidades'} para la semana.`
+        : 'Para especialidades médicas, seleccioná un día hábil (lunes a viernes).',
+    }
+  }
+
   const morningIds    = new Set(morning.map(e => e.id))
   
   // Filtrar por turno detectado si fue especificado
@@ -433,7 +463,11 @@ const SERVICE_ICONS: Record<string, typeof Pill> = {
 }
 
 function getDayIndex(): number {
-  const d = new Date().getDay(); return (d >= 1 && d <= 5) ? d : 1
+  return new Date().getDay()
+}
+
+function toScheduleDay(day: number): number | null {
+  return day >= 1 && day <= 5 ? day : null
 }
 
 interface Props {
@@ -502,7 +536,8 @@ export function MedicalSchedule({
   )
 
   const filtered = useMemo(() => {
-    const byDay = entries.filter(e => e.day === activeDay)
+    const scheduleDay = toScheduleDay(activeDay)
+    const byDay = scheduleDay === null ? [] : entries.filter(e => e.day === scheduleDay)
     if (!searchTerm.trim()) return byDay
     if (inference.hasMatch && !inference.isService) {
       const m = byDay.filter(e =>
@@ -518,7 +553,22 @@ export function MedicalSchedule({
     )
   }, [entries, activeDay, searchTerm, inference])
 
-  const days = [1, 2, 3, 4, 5] as const
+  const weekTabs = useMemo(() => {
+    const now = new Date()
+    const monday = new Date(now)
+    const diffToMonday = (now.getDay() + 6) % 7
+    monday.setDate(now.getDate() - diffToMonday)
+
+    const order = [1, 2, 3, 4, 5, 6, 0]
+    return order.map((day, index) => {
+      const date = new Date(monday)
+      date.setDate(monday.getDate() + index)
+      return {
+        day,
+        dateLabel: date.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' }),
+      }
+    })
+  }, [])
 
   return (
     <div className="w-full rounded-[28px] bg-[#FAF9F6] p-4 shadow-[0_18px_40px_rgba(45,90,39,0.14)] sm:p-5">
@@ -741,26 +791,31 @@ export function MedicalSchedule({
       </div>
 
       {/* TABS DÍAS */}
-      <div className="mb-4 overflow-x-auto rounded-[24px] border border-[#8B4513]/25 bg-[#FAF9F6] shadow-[0_12px_28px_rgba(45,90,39,0.12)]">
-        <nav className="flex min-w-max sm:min-w-0" role="tablist">
-          {days.map(d => {
+      <div className="mb-4 rounded-[24px] border border-[#8B4513]/25 bg-[#FAF9F6] shadow-[0_12px_28px_rgba(45,90,39,0.12)]">
+        <nav className="grid grid-cols-7" role="tablist">
+          {weekTabs.map(({ day: d, dateLabel }) => {
             const isActive = d === activeDay
             const autoSel  = inference.detectedDay === d && showResult && !inference.isService
             const mCount   = morningEntries.filter(e => e.day === d).length
             const tCount   = afternoonEntries.filter(e => e.day === d).length
             return (
               <button key={d} role="tab" aria-selected={isActive} onClick={() => setActiveDay(d)}
-                className={`relative flex min-w-[80px] flex-1 flex-col items-center gap-0.5
-                            border-b-2 px-3 py-3.5 text-xs font-medium transition-all
-                            sm:min-w-0 sm:px-6 sm:py-3 sm:text-sm
+                className={`relative flex min-w-0 flex-col items-center gap-0.5 border-b-2
+                            px-1.5 py-3 text-[10px] font-medium transition-all sm:px-3 sm:text-xs
                   ${isActive
                     ? autoSel ? 'border-[#8B4513] text-[#2D5A27] bg-[#F3ECE6]'
                               : 'border-[#8B4513] text-[#2D5A27] bg-[#FAF9F6]'
                     : 'border-transparent text-slate-500 hover:border-[#8B4513]/40 hover:bg-[#F7F3EE]'}`}>
                 <span className="truncate">{DAY_LABELS[d]}</span>
                 <span className={`text-[10px] font-bold ${isActive ? 'text-[#B0793A]' : 'text-[#C4A484]'}`}>
-                  {mCount + tCount}
+                  {dateLabel}
                 </span>
+                {d !== 0 && d !== 6 && (
+                  <span className="text-[9px] text-slate-400">{mCount + tCount}</span>
+                )}
+                {d === 0 || d === 6 ? (
+                  <span className="text-[9px] font-semibold text-[#8B4513]">Guardia</span>
+                ) : null}
                 {autoSel && isActive && <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-[#8B4513]"/>}
               </button>
             )
@@ -805,7 +860,12 @@ export function MedicalSchedule({
       </div>
 
       {/* LISTA */}
-      {filtered.length === 0 ? (
+      {activeDay === 0 || activeDay === 6 ? (
+        <div className="rounded-[24px] border border-[#8B4513]/35 bg-[#F3ECE6] px-5 py-6 text-center shadow-[0_10px_24px_rgba(45,90,39,0.08)]">
+          <p className="text-sm font-semibold text-[#2D5A27]">Fin de semana: guardia activa 24 hs</p>
+          <p className="mt-1 text-xs text-[#8B4513]">No hay consultorios de especialidades programados para sábado y domingo.</p>
+        </div>
+      ) : filtered.length === 0 ? (
         <div className="rounded-[24px] border border-[#8B4513]/25 bg-[#F7F3EE] px-5 py-10 text-center shadow-[0_10px_24px_rgba(45,90,39,0.08)]">
           <p className="text-sm text-slate-500">No hay especialistas para este turno.</p>
         </div>

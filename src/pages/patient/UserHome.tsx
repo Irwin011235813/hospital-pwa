@@ -5,6 +5,7 @@ import { signOut }             from 'firebase/auth'
 import { auth, db }            from '@/lib/firebase'
 import { NewsFeed }            from '@/components/patient/NewsFeed'
 import { MedicalSchedule }     from '@/components/patient/MedicalSchedule'
+import { EmergencyFab }        from '@/components/ui/EmergencyFab'
 import type { Noticia }        from '@/components/patient/NoticiasCard'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Pagination }          from 'swiper/modules'
@@ -222,6 +223,7 @@ export default function UserHome() {
 
       </div>
       {/* BottomNav solo para pacientes */}
+      <EmergencyFab />
     </div>
   )
 }

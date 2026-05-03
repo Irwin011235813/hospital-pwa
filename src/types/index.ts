@@ -100,3 +100,18 @@ export interface PermanentService {
   professional?: string
   contact?:     string
 }
+
+export type DeaAvailability = 'active' | 'maintenance' | 'restricted'
+
+export interface DefibrillatorPoint {
+  id:           string
+  name:         string
+  address:      string
+  lat:          number
+  lng:          number
+  accessHours:  string
+  locationHint?: string
+  phone?:       string
+  availability: DeaAvailability
+  verifiedAt:   string
+}

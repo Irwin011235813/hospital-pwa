@@ -46,5 +46,11 @@ service cloud.firestore {
       allow read: if isAuth();
       allow write: if isAdmin();
     }
+
+    // Colección de DEAs (Desfibriladores)
+    match /dea_points/{deaId} {
+      allow read: if isAuth(); // Cualquier vecino logueado puede ver los DEAs
+      allow write: if isAdmin(); // Solo el Admin agrega/edita/borra
+    }
   }
 }

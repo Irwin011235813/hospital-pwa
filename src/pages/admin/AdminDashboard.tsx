@@ -138,6 +138,14 @@ export default function AdminDashboard() {
 		<div className="min-h-screen bg-[#FAF9F6]">
 			<AdminNavBar onLogout={handleLogout} />
 			<div className="page-content space-y-4 pb-24">
+				<div className="flex justify-end">
+					<button
+						onClick={() => navigate('/admin/dea')}
+						className="rounded-[16px] border border-[#2D5A27]/25 bg-[#EAF2E8] px-3 py-2 text-xs font-semibold text-[#2D5A27]"
+					>
+						Gestionar DEAs
+					</button>
+				</div>
 				{/* Composer ancla */}
 				<div id="composer-novedad" />
 

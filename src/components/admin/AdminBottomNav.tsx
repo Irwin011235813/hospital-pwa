@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Megaphone, Search, CalendarClock } from 'lucide-react'
+import { LayoutDashboard, Megaphone, Search, ShieldPlus } from 'lucide-react'
 
 const tabs = [
   {
@@ -24,11 +24,11 @@ const tabs = [
     soon:  false,
   },
   {
-    id:    'turnos',
-    icon:  CalendarClock,
-    label: 'Turnos',
-    path:  '/admin/turnos',
-    soon:  true,
+    id:    'dea',
+    icon:  ShieldPlus,
+    label: 'DEA',
+    path:  '/admin/dea',
+    soon:  false,
   },
 ]
 

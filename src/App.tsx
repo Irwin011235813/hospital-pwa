@@ -9,10 +9,13 @@ import SetupDniPage        from '@/pages/SetupDniPage'
 import UserHome            from '@/pages/patient/UserHome'
 import PatientDashboard    from '@/pages/patient/PatientDashboard'
 import MedicalRecordsPage  from '@/pages/patient/MedicalRecordsPage'
+import DeaNearbyPage       from '@/pages/patient/DeaNearbyPage'
+import DeaDetailPage       from '@/pages/patient/DeaDetailPage'
 import VacunacionPage from './pages/patient/VacunacionPage'
 import AdminDashboard      from '@/pages/admin/AdminDashboard'
 import AttendPatientPage   from '@/pages/admin/AttendPatientPage'
 import SearchPatientPage   from '@/pages/admin/SearchPatientPage'
+import AdminDeaPage        from '@/pages/admin/AdminDeaPage'
 import OfflineAlert from '@/components/ui/OfflineAlert'
 
 function LoadingScreen() {
@@ -75,11 +78,14 @@ export default function App() {
         <Route path="/patient"         element={user ? <PatientDashboard />    : <Navigate to="/login" replace />}/>
         <Route path="/patient/records" element={user ? <MedicalRecordsPage />  : <Navigate to="/login" replace />}/>
         <Route path="/patient/vacunacion" element={user ? <VacunacionPage />   : <Navigate to="/login" replace />}/>
+        <Route path="/patient/dea" element={user ? <DeaNearbyPage /> : <Navigate to="/login" replace />}/>
+        <Route path="/patient/dea/:deaId" element={user ? <DeaDetailPage /> : <Navigate to="/login" replace />}/>
 
         {/* Admin */}
         <Route path="/admin"            element={user && isAdmin ? <AdminDashboard />    : <Navigate to={user ? '/home' : '/login'} replace />}/>
         <Route path="/admin/attend/:id" element={user && isAdmin ? <AttendPatientPage /> : <Navigate to={user ? '/home' : '/login'} replace />}/>
         <Route path="/admin/search"     element={user && isAdmin ? <SearchPatientPage /> : <Navigate to={user ? '/home' : '/login'} replace />}/>
+        <Route path="/admin/dea"        element={user && isAdmin ? <AdminDeaPage />      : <Navigate to={user ? '/home' : '/login'} replace />}/>
 
         <Route path="/" element={<Navigate to="/login" replace />}/>
         <Route path="*" element={<Navigate to="/login" replace />}/>
