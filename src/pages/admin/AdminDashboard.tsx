@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
-import { addDoc, collection, query, orderBy, onSnapshot, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection, query, orderBy, onSnapshot, serverTimestamp, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { auth, db, storage } from '../../lib/firebase';
 import { Noticia, NoticiasCard } from '../../components/patient/NoticiasCard';
 import AdminNavBar from '../../components/admin/AdminNavBar';
+import AdminBottomNav from '../../components/admin/AdminBottomNav';
 import { Star, Image as ImageIcon, FileText, Video, X, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 type NewsCategory = 'Salud' | 'Institucional' | 'Urgente';
@@ -25,6 +26,9 @@ export default function AdminDashboard() {
 	const [publishError, setPublishError] = useState('');
 	const [publishSuccess, setPublishSuccess] = useState(false);
 	const [expanded, setExpanded] = useState(false);
+	const [filterCat, setFilterCat] = useState<NewsCategory | 'Todas'>('Todas');
+	const [editingId, setEditingId] = useState<string | null>(null);
+	const [imagePreview, setImagePreview] = useState<string | null>(null);
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const navigate = useNavigate();
 
@@ -43,8 +47,10 @@ export default function AdminDashboard() {
 
 	const handleCollapse = () => {
 		setExpanded(false);
+		setEditingId(null);
 		setPostForm({ titulo: '', cuerpo: '', categoria: 'Salud', imagen: '', destacada: false });
 		setUploadFile(null);
+		setImagePreview(null);
 		setPublishError('');
 	};
 
@@ -70,19 +76,28 @@ export default function AdminDashboard() {
 				await uploadBytes(fileRef, uploadFile);
 				imageUrl = await getDownloadURL(fileRef);
 			}
-			await addDoc(collection(db, 'noticias'), {
+			const payload = {
 				titulo:    postForm.titulo.trim(),
 				cuerpo:    postForm.cuerpo.trim(),
 				categoria: postForm.categoria,
 				imagen:    imageUrl,
 				destacada: postForm.destacada,
-				autorId:   auth.currentUser?.uid ?? '',
-				fecha:     new Date().toISOString(),
-				createdAt: serverTimestamp(),
-			});
+			};
+			if (editingId) {
+				await updateDoc(doc(db, 'noticias', editingId), payload);
+			} else {
+				await addDoc(collection(db, 'noticias'), {
+					...payload,
+					autorId:   auth.currentUser?.uid ?? '',
+					fecha:     new Date().toISOString(),
+					createdAt: serverTimestamp(),
+				});
+			}
 			setPublishSuccess(true);
 			setPostForm({ titulo: '', cuerpo: '', categoria: 'Salud', imagen: '', destacada: false });
 			setUploadFile(null);
+			setImagePreview(null);
+			setEditingId(null);
 			setTimeout(() => { setPublishSuccess(false); setExpanded(false); }, 1500);
 		} catch (err) {
 			console.error('[AdminDashboard] publish error', err);
@@ -92,10 +107,37 @@ export default function AdminDashboard() {
 		}
 	};
 
+	const handleDelete = async (id: string) => {
+		if (!window.confirm('¿Eliminar esta publicación? Esta acción no se puede deshacer.')) return;
+		try {
+			await deleteDoc(doc(db, 'noticias', id));
+		} catch (err) {
+			console.error('[AdminDashboard] delete error', err);
+		}
+	};
+
+	const handleEdit = (noticia: Noticia) => {
+		setEditingId(noticia.id);
+		setPostForm({
+			titulo:    noticia.titulo,
+			cuerpo:    noticia.cuerpo,
+			categoria: noticia.categoria as NewsCategory,
+			imagen:    noticia.imagen ?? '',
+			destacada: noticia.destacada,
+		});
+		setExpanded(true);
+		setImagePreview(null);
+		document.getElementById('composer-novedad')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+	};
+
+	const catCounts = { Salud: 0, Institucional: 0, Urgente: 0 } as Record<string, number>;
+	news.forEach(n => { if (n.categoria in catCounts) catCounts[n.categoria]++; });
+	const filteredNews = filterCat === 'Todas' ? news : news.filter(n => n.categoria === filterCat);
+
 	return (
 		<div>
-			<AdminNavBar onLogout={handleLogout} onGoToComposer={handleGoToComposer} />
-			<div className="page-content space-y-4">
+			<AdminNavBar onLogout={handleLogout} />
+			<div className="page-content space-y-4 pb-24">
 				{/* Composer ancla */}
 				<div id="composer-novedad" />
 
@@ -155,14 +197,23 @@ export default function AdminDashboard() {
 								className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
 							/>
 
-							{/* Imagen seleccionada preview */}
-							{uploadFile && (
-								<div className="flex items-center gap-2 rounded-xl bg-blue-50 border border-blue-200 px-3 py-2 text-sm text-blue-700">
-									<ImageIcon size={14} />
-									<span className="truncate flex-1">{uploadFile.name}</span>
-									<button onClick={() => setUploadFile(null)}>
-										<X size={14} />
-									</button>
+{/* Preview imagen */}
+					{imagePreview && (
+						<div className="relative rounded-xl overflow-hidden border border-slate-200">
+							<img src={imagePreview} alt="preview" className="w-full h-40 object-cover" />
+							<button
+								onClick={() => { setUploadFile(null); setImagePreview(null); }}
+								className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-full bg-black/50 hover:bg-black/70 transition-colors"
+							>
+								<X size={14} className="text-white" />
+							</button>
+						</div>
+					)}
+					{uploadFile && !imagePreview && (
+						<div className="flex items-center gap-2 rounded-xl bg-blue-50 border border-blue-200 px-3 py-2 text-sm text-blue-700">
+							<ImageIcon size={14} />
+							<span className="truncate flex-1">{uploadFile.name}</span>
+							<button onClick={() => setUploadFile(null)}><X size={14} /></button>
 								</div>
 							)}
 
@@ -193,7 +244,11 @@ export default function AdminDashboard() {
 								type="file"
 								accept="image/*"
 								className="hidden"
-								onChange={(e) => setUploadFile(e.target.files?.[0] ?? null)}
+								onChange={(e) => {
+									const f = e.target.files?.[0] ?? null;
+									setUploadFile(f);
+									setImagePreview(f ? URL.createObjectURL(f) : null);
+								}}
 							/>
 
 							<button
@@ -201,7 +256,7 @@ export default function AdminDashboard() {
 								disabled={publishing || !postForm.titulo.trim() || !postForm.cuerpo.trim()}
 								className="w-full rounded-xl bg-blue-800 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-900 disabled:opacity-40"
 							>
-								{publishing ? 'Publicando...' : 'Publicar'}
+								{publishing ? (editingId ? 'Guardando...' : 'Publicando...') : (editingId ? 'Guardar cambios' : 'Publicar')}
 							</button>
 						</div>
 					)}
@@ -225,10 +280,10 @@ export default function AdminDashboard() {
 							</button>
 							<button
 								onClick={() => setExpanded(true)}
-								className="flex flex-1 items-center justify-center gap-2 py-2 rounded-lg hover:bg-slate-50 transition-colors text-sm font-semibold text-slate-600"
+								className="flex flex-1 items-center justify-center gap-2 py-2 rounded-lg hover:bg-slate-50 transition-colors text-sm font-semibold text-slate-600 whitespace-nowrap"
 							>
 								<FileText size={18} className="text-orange-600" />
-								Escribir artículo
+								Artículo
 							</button>
 						</div>
 					)}
@@ -236,28 +291,55 @@ export default function AdminDashboard() {
 
 				{/* Feed de novedades */}
 				<div className="space-y-4">
-					<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-						<div>
-							<p className="text-base font-bold text-slate-900">Feed de novedades</p>
-							<p className="text-sm text-slate-500">Las últimas noticias que verá el paciente.</p>
+					<div className="flex flex-col gap-3">
+						<div className="flex items-center justify-between">
+							<div>
+								<p className="text-base font-bold text-slate-900">Feed de novedades</p>
+								<p className="text-sm text-slate-500">Las últimas noticias que verá el paciente.</p>
+							</div>
 						</div>
-						<span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-							{news.length} publicaciones
-						</span>
+						{/* Chips contador + filtro */}
+						<div className="flex flex-wrap gap-2">
+							{(['Todas', 'Salud', 'Institucional', 'Urgente'] as const).map(cat => {
+								const count = cat === 'Todas' ? news.length : (catCounts[cat] ?? 0);
+								return (
+									<button
+										key={cat}
+										onClick={() => setFilterCat(cat)}
+										className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-all border ${
+											filterCat === cat
+												? 'bg-blue-800 text-white border-blue-800'
+												: 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+										}`}
+									>
+										{cat}
+										<span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
+											filterCat === cat ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
+										}`}>{count}</span>
+									</button>
+								);
+							})}
+						</div>
 					</div>
-					{news.length === 0 ? (
+					{filteredNews.length === 0 ? (
 						<div className="card text-center py-10 text-slate-500">
-							No hay novedades publicadas aún.
+							{news.length === 0 ? 'No hay novedades publicadas aún.' : 'No hay publicaciones en esta categoría.'}
 						</div>
 					) : (
 						<div className="grid gap-4">
-							{news.map(n => (
-								<NoticiasCard key={n.id} noticia={n} />
+							{filteredNews.map(n => (
+								<NoticiasCard
+									key={n.id}
+									noticia={n}
+									onEdit={() => handleEdit(n)}
+									onDelete={() => handleDelete(n.id)}
+								/>
 							))}
 						</div>
 					)}
 				</div>
 			</div>
+			<AdminBottomNav onPublicar={handleGoToComposer} />
 		</div>
 	);
 }

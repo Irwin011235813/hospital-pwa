@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import AdminBottomNav from '../../components/admin/AdminBottomNav'
 
 // Rutas corregidas (subiendo dos niveles para llegar a src)
 import { userService }           from '../../services/userService'
@@ -41,7 +42,7 @@ export default function SearchPatientPage() {
     <div className="page-root">
       <PageHeader title="Buscar Paciente" subtitle="Por número de DNI" />
 
-      <div className="page-content space-y-5">
+      <div className="page-content space-y-5 pb-24">
         {/* Search input */}
         <div className="card-md">
           <div className="form-group mb-3">
@@ -130,7 +131,7 @@ export default function SearchPatientPage() {
           </div>
         )}
       </div>
-      {/* BottomNav eliminado definitivamente */}
+      <AdminBottomNav />
     </div>
   )
 }

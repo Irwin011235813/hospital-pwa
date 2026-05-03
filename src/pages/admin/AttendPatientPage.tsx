@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
+import AdminBottomNav from '../../components/admin/AdminBottomNav'
 
 // Cambiamos el @/ por ../.. para que Vercel encuentre las carpetas
 import { auth, db }              from '../../lib/firebase'
@@ -187,6 +188,7 @@ export default function AttendPatientPage() {
         </button>
 
       </div>
+      <AdminBottomNav />
     </div>
   )
 }
