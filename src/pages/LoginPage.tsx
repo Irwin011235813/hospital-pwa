@@ -16,25 +16,33 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-brand-900 via-brand-800 to-brand-900 flex flex-col">
+    <div className="min-h-screen flex flex-col relative overflow-hidden">
+      {/* Foto aérea del hospital como fondo */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url('/icons/img del hosp aerea.jpg')" }}
+      />
+      {/* Overlay verde selva translúcido */}
+      <div className="absolute inset-0 bg-[#2D5A27]/80" />
+
       {/* Brand bar */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
-        <div className="w-16 h-16 rounded-[20px] bg-white/10 border border-white/20 flex items-center justify-center mb-6 backdrop-blur-sm shadow-xl">
+      <div className="relative flex-1 flex flex-col items-center justify-center px-6 py-12">
+        <div className="w-16 h-16 rounded-[20px] bg-white/15 border border-white/25 flex items-center justify-center mb-6 backdrop-blur-sm shadow-xl">
           <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
             <path d="M16 6v20M6 16h20" stroke="white" strokeWidth="3" strokeLinecap="round"/>
           </svg>
         </div>
-        <h1 className="font-bold text-3xl text-white tracking-tight mb-1 text-center max-w-xs mx-auto leading-tight">
-  Hospital Nivel 1 <br /> 
-  <span className="text-2xl opacity-90">Puerto Esperanza Misiones</span>
-</h1>
-        <p className="text-brand-300 text-base text-center max-w-xs">
+        <h1 className="font-bold text-3xl text-white tracking-tight mb-1 text-center max-w-xs mx-auto leading-tight drop-shadow-md">
+          Hospital Nivel 1 <br />
+          <span className="text-2xl opacity-90">Puerto Esperanza Misiones</span>
+        </h1>
+        <p className="text-white/70 text-base text-center max-w-xs mt-2 drop-shadow">
           Información y servicios del hospital desde tu celular
         </p>
       </div>
 
       {/* Login card */}
-      <div className="bg-white rounded-t-[28px] px-6 pt-8 pb-10 shadow-2xl">
+      <div className="relative bg-white rounded-t-[28px] px-6 pt-8 pb-10 shadow-2xl">
         <h2 className="font-bold text-slate-900 text-xl mb-1">Ingresá a tu cuenta</h2>
         <p className="text-slate-500 text-sm mb-6">
           Usá tu cuenta de Google para acceder de forma segura
@@ -45,10 +53,10 @@ export default function LoginPage() {
         <button
           onClick={handleGoogle}
           disabled={loading}
-          className="btn btn-secondary btn-lg w-full border-slate-200 hover:border-brand-300 hover:bg-brand-50 transition-colors"
+          className="btn btn-secondary btn-lg w-full border-slate-200 hover:border-[#2D5A27]/40 hover:bg-[#2D5A27]/5 transition-colors"
         >
           {loading ? (
-            <Loader2 size={20} className="animate-spin text-brand-600" />
+            <Loader2 size={20} className="animate-spin text-[#2D5A27]" />
           ) : (
             <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden>
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
