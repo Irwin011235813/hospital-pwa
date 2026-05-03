@@ -106,9 +106,12 @@ export default function UserHome() {
 
   const [noticias,    setNoticias]    = useState<Noticia[]>([])
   const [loading,     setLoading]     = useState(true)
-  const [showBanner,  setShowBanner]  = useState(
-    !localStorage.getItem('pwa-banner-closed')
-  )
+
+  // Mostrar siempre si no está instalada; ocultar si corre como standalone (PWA instalada)
+  const isInstalled =
+    window.matchMedia('(display-mode: standalone)').matches ||
+    (navigator as Navigator & { standalone?: boolean }).standalone === true
+  const [showBanner, setShowBanner] = useState(!isInstalled)
 
   const firstName = user?.displayName?.split(' ')[0] ?? 'Vecino'
 
@@ -125,7 +128,7 @@ export default function UserHome() {
   }, [])
 
   const closeBanner = () => {
-    localStorage.setItem('pwa-banner-closed', '1')
+    // Solo oculta durante esta sesión; no persiste en localStorage
     setShowBanner(false)
   }
 
