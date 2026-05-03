@@ -56,7 +56,7 @@ export default function AdminBottomNav({ onPublicar }: Props) {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-100 safe-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-[#8B4513]/20 bg-[#FAF9F6] safe-bottom shadow-[0_-10px_22px_rgba(45,90,39,0.08)]">
       <div className="flex items-stretch">
         {tabs.map((tab) => {
           const Icon = tab.icon
@@ -71,13 +71,13 @@ export default function AdminBottomNav({ onPublicar }: Props) {
               onClick={() => handleClick(tab)}
               disabled={tab.soon}
               className={`relative flex flex-1 flex-col items-center justify-center gap-0.5 py-3 transition-colors
-                ${tab.soon ? 'opacity-40 cursor-not-allowed' : 'active:bg-slate-50'}
-                ${isActive ? 'text-blue-700' : 'text-slate-400'}
+                ${tab.soon ? 'opacity-40 cursor-not-allowed' : 'active:bg-[#F1ECE6]'}
+                ${isActive ? 'text-[#2D5A27]' : 'text-slate-500'}
               `}
             >
               {/* Indicador activo */}
               {isActive && (
-                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-blue-700" />
+                <span className="absolute top-0 left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-full bg-[#8B4513]" />
               )}
 
               <Icon size={20} strokeWidth={isActive ? 2.5 : 1.8} />

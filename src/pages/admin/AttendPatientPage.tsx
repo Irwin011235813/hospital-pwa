@@ -81,13 +81,13 @@ export default function AttendPatientPage() {
   // ── Guardado exitoso ──────────────────────────────────────────────────────
   if (done) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-6 text-center">
+      <div className="min-h-screen bg-[#FAF9F6] flex flex-col items-center justify-center px-6 text-center">
         <CheckCircle2 size={60} className="text-emerald-500 mb-4" strokeWidth={1.5} />
         <h2 className="font-bold text-xl text-slate-900 mb-2">Atencion registrada</h2>
         <p className="text-slate-500 text-sm mb-6">
           El historial del paciente fue actualizado correctamente.
         </p>
-        <button onClick={() => navigate('/admin')} className="btn-primary">
+        <button onClick={() => navigate('/admin')} className="rounded-[20px] bg-[#2D5A27] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(45,90,39,0.3)] transition hover:bg-[#23481f]">
           Volver a la agenda
         </button>
       </div>
@@ -97,7 +97,7 @@ export default function AttendPatientPage() {
   // ── Turno no encontrado ───────────────────────────────────────────────────
   if (!appt) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-6 text-center">
+      <div className="min-h-screen bg-[#FAF9F6] flex flex-col items-center justify-center px-6 text-center">
         <p className="text-slate-500 mb-4">No se encontro el turno.</p>
         <button onClick={() => navigate('/admin')} className="btn-secondary">
           Volver
@@ -108,10 +108,10 @@ export default function AttendPatientPage() {
 
   // ── Formulario ────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-slate-50 pb-10">
+    <div className="min-h-screen bg-[#FAF9F6] pb-10">
 
       {/* Header */}
-      <header className="bg-white border-b border-slate-100 px-4 py-3 sticky top-0 z-40">
+      <header className="sticky top-0 z-40 border-b border-[#8B4513]/20 bg-[#FAF9F6] px-4 py-3">
         <div className="max-w-2xl mx-auto flex items-center gap-3">
           <button
             onClick={() => navigate('/admin')}
@@ -126,11 +126,11 @@ export default function AttendPatientPage() {
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
 
         {/* Info paciente */}
-        <div className="card-md bg-blue-800 text-white border-0">
-          <p className="text-blue-200 text-xs mb-1">Paciente</p>
+        <div className="card-md border border-[#8B4513]/25 bg-gradient-to-br from-[#2D5A27] to-[#3A6A33] text-white shadow-[0_14px_30px_rgba(45,90,39,0.25)] rounded-[24px]">
+          <p className="text-[#E7E0D8] text-xs mb-1">Paciente</p>
           <p className="font-bold text-lg">{appt.patientName}</p>
-          <p className="text-blue-300 text-sm">DNI {appt.patientDni}</p>
-          <p className="text-blue-200 text-xs mt-2">
+          <p className="text-[#EFE7DB] text-sm">DNI {appt.patientDni}</p>
+          <p className="text-[#E7E0D8] text-xs mt-2">
             {appt.specialty} · {format(new Date(appt.dateTime), "d MMM · HH:mm 'hs'", { locale: es })}
           </p>
         </div>
@@ -142,7 +142,7 @@ export default function AttendPatientPage() {
         )}
 
         {/* Formulario */}
-        <div className="card-md space-y-4">
+        <div className="card-md space-y-4 rounded-[24px] border border-[#8B4513]/20 bg-[#FAF9F6] shadow-[0_12px_28px_rgba(45,90,39,0.1)]">
           <div>
             <label className="label">
               Diagnostico <span className="text-red-500">*</span>
@@ -181,7 +181,7 @@ export default function AttendPatientPage() {
         <button
           onClick={handleSave}
           disabled={saving || !diagnosis.trim()}
-          className="btn-primary btn-lg w-full"
+          className="w-full rounded-[24px] bg-[#2D5A27] px-4 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(45,90,39,0.32)] transition hover:bg-[#23481f] disabled:opacity-50"
         >
           {saving && <Spinner size={18} />}
           {saving ? 'Guardando...' : 'Guardar y marcar como atendido'}

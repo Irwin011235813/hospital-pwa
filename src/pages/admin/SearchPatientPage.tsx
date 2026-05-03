@@ -39,12 +39,12 @@ export default function SearchPatientPage() {
   }
 
   return (
-    <div className="page-root">
+    <div className="page-root min-h-screen bg-[#FAF9F6]">
       <PageHeader title="Buscar Paciente" subtitle="Por número de DNI" />
 
       <div className="page-content space-y-5 pb-24">
         {/* Search input */}
-        <div className="card-md">
+        <div className="card-md rounded-[24px] border border-[#8B4513]/20 bg-[#FAF9F6] shadow-[0_12px_28px_rgba(45,90,39,0.1)]">
           <div className="form-group mb-3">
             <label className="label" htmlFor="search-dni">Número de DNI</label>
             <input
@@ -58,7 +58,11 @@ export default function SearchPatientPage() {
               onKeyDown={e => e.key === 'Enter' && handleSearch()}
             />
           </div>
-          <button onClick={handleSearch} disabled={loading || !dni} className="btn-primary w-full">
+          <button
+            onClick={handleSearch}
+            disabled={loading || !dni}
+            className="w-full rounded-[20px] bg-[#2D5A27] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(45,90,39,0.3)] transition hover:bg-[#23481f] disabled:opacity-50"
+          >
             {loading ? <Spinner size={16} /> : <Search size={16} />}
             {loading ? 'Buscando...' : 'Buscar'}
           </button>
@@ -69,17 +73,17 @@ export default function SearchPatientPage() {
         {/* Patient card */}
         {patient && (
           <div className="space-y-4 animate-fade-up">
-            <div className="card-md bg-brand-800 text-white border-0">
+            <div className="card-md border border-[#8B4513]/25 bg-gradient-to-br from-[#2D5A27] to-[#3A6A33] text-white rounded-[24px] shadow-[0_14px_30px_rgba(45,90,39,0.25)]">
               <div className="flex items-center gap-3">
                 {patient.photoURL ? (
                   <img src={patient.photoURL} alt="" className="w-12 h-12 rounded-full object-cover border-2 border-white/20" />
                 ) : (
-                  <UserCircle2 size={48} className="text-brand-300" strokeWidth={1} />
+                  <UserCircle2 size={48} className="text-[#E7E0D8]" strokeWidth={1} />
                 )}
                 <div>
                   <p className="font-bold text-lg">{patient.displayName}</p>
-                  <p className="text-brand-200 text-sm">DNI {patient.dni}</p>
-                  <p className="text-brand-300 text-xs">{patient.email}</p>
+                  <p className="text-[#E7E0D8] text-sm">DNI {patient.dni}</p>
+                  <p className="text-[#EFE7DB] text-xs">{patient.email}</p>
                 </div>
               </div>
             </div>

@@ -135,23 +135,23 @@ export default function AdminDashboard() {
 	const filteredNews = filterCat === 'Todas' ? news : news.filter(n => n.categoria === filterCat);
 
 	return (
-		<div>
+		<div className="min-h-screen bg-[#FAF9F6]">
 			<AdminNavBar onLogout={handleLogout} />
 			<div className="page-content space-y-4 pb-24">
 				{/* Composer ancla */}
 				<div id="composer-novedad" />
 
 				{/* Composer estilo Facebook */}
-				<div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+				<div className="overflow-hidden rounded-[28px] border border-[#8B4513]/20 bg-[#FAF9F6] shadow-[0_14px_32px_rgba(45,90,39,0.12)]">
 
 					{/* Fila superior: avatar + pill */}
 					<div className="flex items-center gap-3 px-4 pt-4 pb-3">
-						<div className="w-10 h-10 rounded-full bg-blue-800 flex items-center justify-center text-white text-sm font-bold shrink-0">
+						<div className="h-10 w-10 shrink-0 rounded-full bg-[#2D5A27] flex items-center justify-center text-white text-sm font-bold">
 							{auth.currentUser?.displayName?.charAt(0)?.toUpperCase() ?? 'A'}
 						</div>
 						<button
 							onClick={() => setExpanded(true)}
-							className="flex-1 text-left bg-slate-100 hover:bg-slate-200 transition-colors rounded-full px-4 py-2.5 text-sm text-slate-500"
+							className="flex-1 rounded-full bg-[#F1ECE6] px-4 py-2.5 text-left text-sm text-slate-600 transition-colors hover:bg-[#E9E2DA]"
 						>
 							Crear publicación
 						</button>
@@ -186,7 +186,7 @@ export default function AdminDashboard() {
 								value={postForm.titulo}
 								onChange={(e) => setPostForm(f => ({ ...f, titulo: e.target.value }))}
 								placeholder="Título de la novedad"
-								className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+								className="w-full rounded-[24px] border border-[#8B4513]/20 bg-[#F8F5F0] px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-[#2D5A27] focus:outline-none focus:ring-2 focus:ring-[#2D5A27]/20"
 							/>
 
 							<textarea
@@ -194,12 +194,12 @@ export default function AdminDashboard() {
 								onChange={(e) => setPostForm(f => ({ ...f, cuerpo: e.target.value }))}
 								placeholder="¿Qué querés compartir con los pacientes?"
 								rows={4}
-								className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+								className="w-full resize-none rounded-[24px] border border-[#8B4513]/20 bg-[#F8F5F0] px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-[#2D5A27] focus:outline-none focus:ring-2 focus:ring-[#2D5A27]/20"
 							/>
 
 {/* Preview imagen */}
 					{imagePreview && (
-						<div className="relative rounded-xl overflow-hidden border border-slate-200">
+						<div className="relative overflow-hidden rounded-[24px] border border-[#8B4513]/25 shadow-[0_10px_24px_rgba(45,90,39,0.12)]">
 							<img src={imagePreview} alt="preview" className="w-full h-40 object-cover" />
 							<button
 								onClick={() => { setUploadFile(null); setImagePreview(null); }}
@@ -210,7 +210,7 @@ export default function AdminDashboard() {
 						</div>
 					)}
 					{uploadFile && !imagePreview && (
-						<div className="flex items-center gap-2 rounded-xl bg-blue-50 border border-blue-200 px-3 py-2 text-sm text-blue-700">
+						<div className="flex items-center gap-2 rounded-[20px] border border-[#8B4513]/30 bg-[#F3ECE6] px-3 py-2 text-sm text-[#8B4513]">
 							<ImageIcon size={14} />
 							<span className="truncate flex-1">{uploadFile.name}</span>
 							<button onClick={() => setUploadFile(null)}><X size={14} /></button>
@@ -221,7 +221,7 @@ export default function AdminDashboard() {
 								<select
 									value={postForm.categoria}
 									onChange={(e) => setPostForm(f => ({ ...f, categoria: e.target.value as NewsCategory }))}
-									className="flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+									className="flex-1 rounded-[20px] border border-[#8B4513]/20 bg-white px-3 py-2.5 text-sm focus:border-[#2D5A27] focus:outline-none focus:ring-2 focus:ring-[#2D5A27]/20"
 								>
 									<option value="Salud">Salud</option>
 									<option value="Institucional">Institucional</option>
@@ -231,9 +231,9 @@ export default function AdminDashboard() {
 								<button
 									type="button"
 									onClick={() => setPostForm(f => ({ ...f, destacada: !f.destacada }))}
-									className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-2.5 text-sm font-semibold transition ${postForm.destacada ? 'border-blue-700 bg-blue-50 text-blue-700' : 'border-slate-200 bg-white text-slate-600 hover:border-blue-300'}`}
+									className={`inline-flex items-center gap-1.5 rounded-[20px] border px-3 py-2.5 text-sm font-semibold transition ${postForm.destacada ? 'border-[#2D5A27] bg-[#EAF2E8] text-[#2D5A27]' : 'border-[#8B4513]/20 bg-white text-slate-600 hover:border-[#8B4513]/45'}`}
 								>
-									<Star size={15} className={postForm.destacada ? 'text-blue-700 fill-blue-700' : 'text-slate-400'} />
+									<Star size={15} className={postForm.destacada ? 'text-[#2D5A27] fill-[#2D5A27]' : 'text-slate-400'} />
 									Destacada
 								</button>
 							</div>
@@ -254,7 +254,7 @@ export default function AdminDashboard() {
 							<button
 								onClick={handlePublish}
 								disabled={publishing || !postForm.titulo.trim() || !postForm.cuerpo.trim()}
-								className="w-full rounded-xl bg-blue-800 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-900 disabled:opacity-40"
+								className="w-full rounded-[24px] bg-[#2D5A27] py-2.5 text-sm font-semibold text-white transition hover:bg-[#23481f] disabled:opacity-40"
 							>
 								{publishing ? (editingId ? 'Guardando...' : 'Publicando...') : (editingId ? 'Guardar cambios' : 'Publicar')}
 							</button>
@@ -263,26 +263,26 @@ export default function AdminDashboard() {
 
 					{/* Botones de acción inferiores (siempre visibles) */}
 					{!expanded && (
-						<div className="flex items-center divide-x divide-slate-100 px-2 py-1">
+						<div className="flex items-center divide-x divide-[#8B4513]/15 px-2 py-1">
 							<button
 								onClick={() => setExpanded(true)}
-								className="flex flex-1 items-center justify-center gap-2 py-2 rounded-lg hover:bg-slate-50 transition-colors text-sm font-semibold text-slate-600"
+								className="flex flex-1 items-center justify-center gap-2 rounded-[16px] py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-[#F1ECE6]"
 							>
-								<Video size={18} className="text-green-600" />
+								<Video size={18} className="text-[#2D5A27]" />
 								Vídeo
 							</button>
 							<button
 								onClick={() => { setExpanded(true); setTimeout(() => fileInputRef.current?.click(), 100); }}
-								className="flex flex-1 items-center justify-center gap-2 py-2 rounded-lg hover:bg-slate-50 transition-colors text-sm font-semibold text-slate-600"
+								className="flex flex-1 items-center justify-center gap-2 rounded-[16px] py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-[#F1ECE6]"
 							>
-								<ImageIcon size={18} className="text-blue-500" />
+								<ImageIcon size={18} className="text-[#8B4513]" />
 								Foto
 							</button>
 							<button
 								onClick={() => setExpanded(true)}
-								className="flex flex-1 items-center justify-center gap-2 py-2 rounded-lg hover:bg-slate-50 transition-colors text-sm font-semibold text-slate-600 whitespace-nowrap"
+								className="flex flex-1 items-center justify-center gap-2 rounded-[16px] py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-[#F1ECE6] whitespace-nowrap"
 							>
-								<FileText size={18} className="text-orange-600" />
+								<FileText size={18} className="text-[#8B4513]" />
 								Artículo
 							</button>
 						</div>
@@ -308,8 +308,8 @@ export default function AdminDashboard() {
 										onClick={() => setFilterCat(cat)}
 										className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-all border ${
 											filterCat === cat
-												? 'bg-blue-800 text-white border-blue-800'
-												: 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+												? 'bg-[#2D5A27] text-white border-[#2D5A27]'
+												: 'bg-white text-slate-600 border-[#8B4513]/20 hover:border-[#8B4513]/45'
 										}`}
 									>
 										{cat}

@@ -521,10 +521,10 @@ export function MedicalSchedule({
   const days = [1, 2, 3, 4, 5] as const
 
   return (
-    <div className="w-full">
+    <div className="w-full rounded-[28px] bg-[#FAF9F6] p-4 shadow-[0_18px_40px_rgba(45,90,39,0.14)] sm:p-5">
       <style>{`
-        @keyframes glowPulse{0%,100%{box-shadow:0 0 0 0 rgba(139,92,246,0)}50%{box-shadow:0 0 18px 4px rgba(139,92,246,.22),0 0 28px 8px rgba(6,182,212,.13)}}
-        @keyframes glowFocused{0%,100%{box-shadow:0 0 12px 3px rgba(139,92,246,.32)}50%{box-shadow:0 0 24px 8px rgba(139,92,246,.48),0 0 36px 12px rgba(6,182,212,.28)}}
+        @keyframes glowPulse{0%,100%{box-shadow:0 0 0 0 rgba(176,121,58,0)}50%{box-shadow:0 0 16px 4px rgba(176,121,58,.20),0 0 26px 9px rgba(139,69,19,.16)}}
+        @keyframes glowFocused{0%,100%{box-shadow:0 0 12px 3px rgba(176,121,58,.26)}50%{box-shadow:0 0 24px 8px rgba(176,121,58,.42),0 0 34px 12px rgba(139,69,19,.24)}}
         @keyframes floatIn{from{opacity:0;transform:translateY(10px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
         @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
         @keyframes wave{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
@@ -552,12 +552,12 @@ export function MedicalSchedule({
             {isTyping ? (
               <div className="flex items-center gap-[3px] h-5">
                 {[1,2,3,4].map(i => (
-                  <div key={i} className="w-[3px] rounded-full bg-violet-400"
+                  <div key={i} className="w-[3px] rounded-full bg-[#8B4513]"
                     style={{height:'100%',animation:'wave .7s ease-in-out infinite',animationDelay:`${i*.12}s`}} />
                 ))}
               </div>
             ) : (
-              <Sparkles size={17} className={focused ? 'text-violet-500' : 'text-slate-400'} />
+              <Sparkles size={17} className={focused ? 'text-[#8B4513]' : 'text-slate-400'} />
             )}
           </div>
           <input
@@ -568,13 +568,13 @@ export function MedicalSchedule({
             onChange={e => setSearchTerm(e.target.value)}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
-            className="w-full pl-11 pr-28 py-3.5 rounded-2xl border-2 bg-white text-sm
+            className="w-full pl-11 pr-28 py-3.5 rounded-2xl border-2 bg-[#FAF9F6] text-sm
                        text-slate-900 placeholder:text-slate-400 focus:outline-none
-                       transition-all duration-300 border-slate-200 focus:border-violet-400"
+                       transition-all duration-300 border-[#8B4513]/20 focus:border-[#B0793A]"
           />
           <div className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center gap-2">
             {isTyping && (
-              <span className="text-[11px] text-violet-400 font-semibold whitespace-nowrap">
+              <span className="text-[11px] text-[#8B4513] font-semibold whitespace-nowrap">
                 Procesando{'.'.repeat(dotCount)}
               </span>
             )}
@@ -590,7 +590,7 @@ export function MedicalSchedule({
         {showResult && inference.hasMatch && (
           <div className="mt-2 slide-down">
             <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
-              <div className="h-full rounded-full bg-gradient-to-r from-violet-500 to-cyan-500 transition-all duration-700"
+              <div className="h-full rounded-full bg-gradient-to-r from-[#B0793A] to-[#8B4513] transition-all duration-700"
                 style={{width:`${inference.confidence}%`}} />
             </div>
           </div>
@@ -600,12 +600,12 @@ export function MedicalSchedule({
           <div className="mt-3 flex flex-wrap gap-2">
             {SUGERENCIAS.map((s,i) => (
               <button key={s} onClick={() => { setSearchTerm(s); inputRef.current?.focus() }}
-                className="bubble-in flex items-center gap-1.5 px-3 py-2 rounded-full bg-white
-                           border border-slate-200 text-slate-600 text-xs font-medium
-                           hover:border-violet-300 hover:text-violet-700 hover:bg-violet-50
-                           transition-all active:scale-95 shadow-sm"
+                className="bubble-in group flex items-center gap-1.5 rounded-full border border-[#8B4513]/25
+                           bg-[#F3ECE6] px-3 py-2 text-xs font-medium text-[#8B4513]
+                           transition-all shadow-sm active:scale-95 hover:border-[#2D5A27]
+                           hover:bg-[#2D5A27] hover:text-white"
                 style={{animationDelay:`${i*.05}s`}}>
-                <Sparkles size={10} className="text-violet-400" />{s}
+                <Sparkles size={10} className="text-[#8B4513] transition-colors group-hover:text-white" />{s}
               </button>
             ))}
           </div>
@@ -677,15 +677,15 @@ export function MedicalSchedule({
                     </div>
                   )}
                   {timeAnalysis.nextDoctor && (
-                    <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-xl border border-blue-200 mb-2">
-                      <AlertCircle size={15} className="text-blue-600 mt-0.5 shrink-0" />
+                    <div className="mb-2 flex items-start gap-2 rounded-[20px] border border-[#8B4513]/35 bg-[#F3ECE6] p-3 shadow-[0_8px_18px_rgba(45,90,39,0.08)]">
+                      <AlertCircle size={15} className="mt-0.5 shrink-0 text-[#8B4513]" />
                       <div>
-                        <p className="text-blue-800 text-xs font-bold">Próximo turno del día</p>
-                        <p className="text-blue-700 text-sm font-medium mt-0.5">{timeAnalysis.nextDoctor.doctorName} — {timeAnalysis.nextDoctor.specialty}</p>
-                        <p className="text-blue-600 text-xs font-mono mt-0.5">
+                        <p className="text-xs font-bold text-[#2D5A27]">Próximo turno del día</p>
+                        <p className="mt-0.5 text-sm font-medium text-[#2D5A27]">{timeAnalysis.nextDoctor.doctorName} — {timeAnalysis.nextDoctor.specialty}</p>
+                        <p className="mt-0.5 text-xs font-mono text-[#8B4513]">
                           {timeAnalysis.nextDoctor.timeRange}
                           {timeAnalysis.minutesUntilNext !== null && timeAnalysis.minutesUntilNext < 120 && (
-                            <span className="ml-2 text-blue-500">(en {timeAnalysis.minutesUntilNext} min)</span>
+                            <span className="ml-2 text-[#8B4513]">(en {timeAnalysis.minutesUntilNext} min)</span>
                           )}
                         </p>
                       </div>
@@ -741,7 +741,7 @@ export function MedicalSchedule({
       </div>
 
       {/* TABS DÍAS */}
-      <div className="mb-4 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="mb-4 overflow-x-auto rounded-[24px] border border-[#8B4513]/25 bg-[#FAF9F6] shadow-[0_12px_28px_rgba(45,90,39,0.12)]">
         <nav className="flex min-w-max sm:min-w-0" role="tablist">
           {days.map(d => {
             const isActive = d === activeDay
@@ -754,14 +754,14 @@ export function MedicalSchedule({
                             border-b-2 px-2 py-3.5 text-xs font-medium transition-all
                             sm:min-w-0 sm:px-4 sm:py-3 sm:text-sm
                   ${isActive
-                    ? autoSel ? 'border-violet-600 text-violet-800 bg-violet-50/40'
-                              : 'border-blue-700 text-blue-800 bg-blue-50/30'
-                    : 'border-transparent text-slate-500 hover:border-slate-300 hover:bg-slate-50'}`}>
+                    ? autoSel ? 'border-[#8B4513] text-[#2D5A27] bg-[#F3ECE6]'
+                              : 'border-[#8B4513] text-[#2D5A27] bg-[#FAF9F6]'
+                    : 'border-transparent text-slate-500 hover:border-[#8B4513]/40 hover:bg-[#F7F3EE]'}`}>
                 <span className="truncate">{DAY_LABELS[d]}</span>
-                <span className={`text-[10px] font-bold ${isActive ? autoSel ? 'text-violet-500' : 'text-blue-600' : 'text-slate-400'}`}>
+                <span className={`text-[10px] font-bold ${isActive ? 'text-[#2D5A27]' : 'text-slate-400'}`}>
                   {mCount + tCount}
                 </span>
-                {autoSel && isActive && <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-violet-500"/>}
+                {autoSel && isActive && <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-[#8B4513]"/>}
               </button>
             )
           })}
@@ -769,16 +769,16 @@ export function MedicalSchedule({
       </div>
 
       {/* SWITCH TURNO */}
-      <div className="mb-6 flex gap-1.5 rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm">
+      <div className="mb-6 flex gap-1.5 rounded-[24px] border border-[#8B4513]/25 bg-[#FAF9F6] p-1.5 shadow-[0_12px_28px_rgba(45,90,39,0.12)]">
         {(['mañana','tarde'] as const).map(s => {
           const autoSel = inference.detectedShift === s && showResult && !inference.isService
           return (
             <button key={s} onClick={() => setShift(s)}
-              className={`flex-1 rounded-lg py-3.5 text-sm font-bold transition-all active:scale-[0.98]
+              className={`flex-1 rounded-[20px] py-3.5 text-sm font-bold transition-all active:scale-[0.98]
                 ${shift === s
-                  ? autoSel ? 'bg-gradient-to-r from-violet-600 to-cyan-600 text-white shadow-md'
-                            : 'bg-gradient-to-r from-blue-700 to-blue-600 text-white shadow-md'
-                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
+                  ? autoSel ? 'bg-gradient-to-r from-[#2D5A27] to-[#3E6E36] text-white shadow-[0_10px_24px_rgba(45,90,39,0.35)]'
+                            : 'bg-[#2D5A27] text-white shadow-[0_10px_24px_rgba(45,90,39,0.35)]'
+                  : 'text-slate-600 hover:bg-[#F7F3EE] hover:text-[#2D5A27]'}`}>
               <div className="flex flex-col items-center gap-0.5">
                 <div className="flex items-center gap-1">
                   <span>{s === 'mañana' ? 'Mañana' : 'Tarde'}</span>
@@ -799,22 +799,22 @@ export function MedicalSchedule({
         <h3 className="text-sm font-semibold text-slate-700">
           {DAY_LABELS[activeDay]} — {shift === 'mañana' ? 'Mañana' : 'Tarde'}
           {inference.hasMatch && showResult && !inference.isService && (
-            <span className="ml-2 text-violet-500 text-xs font-normal">· especialistas recomendados</span>
+            <span className="ml-2 text-[#8B4513] text-xs font-normal">· especialistas recomendados</span>
           )}
         </h3>
       </div>
 
       {/* LISTA */}
       {filtered.length === 0 ? (
-        <div className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-10 text-center">
+        <div className="rounded-[24px] border border-[#8B4513]/25 bg-[#F7F3EE] px-5 py-10 text-center shadow-[0_10px_24px_rgba(45,90,39,0.08)]">
           <p className="text-sm text-slate-500">No hay especialistas para este turno.</p>
         </div>
       ) : (
         <div className="mb-6 space-y-3">
-          <div className="hidden overflow-hidden rounded-xl border border-slate-200 bg-white sm:block">
+          <div className="hidden overflow-hidden rounded-[24px] border border-[#8B4513]/25 bg-[#FAF9F6] shadow-[0_12px_28px_rgba(45,90,39,0.1)] sm:block">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50">
+                <tr className="border-b border-[#8B4513]/20 bg-[#F7F3EE]">
                   <th className="px-4 py-2.5 font-semibold text-slate-600 text-[11px] uppercase tracking-wide">Especialidad</th>
                   <th className="px-4 py-2.5 font-semibold text-slate-600 text-[11px] uppercase tracking-wide">Profesional</th>
                   <th className="px-4 py-2.5 font-semibold text-slate-600 text-[11px] uppercase tracking-wide">Horario</th>
@@ -826,12 +826,12 @@ export function MedicalSchedule({
                     normalize(e.specialty).includes(normalize(sp)))
                   return (
                     <tr key={e.id} className={`border-b border-slate-100 transition-colors last:border-b-0
-                      ${rec ? 'bg-violet-50/40 hover:bg-violet-50' : 'hover:bg-slate-50'}`}>
+                      ${rec ? 'bg-[#F3ECE6] hover:bg-[#EEE3D8]' : 'hover:bg-[#F7F3EE]'}`}>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          {rec && <Sparkles size={13} className="text-violet-500 shrink-0"/>}
-                          <Stethoscope size={14} className="text-slate-400 shrink-0"/>
-                          <span className={`font-semibold text-sm ${rec ? 'text-violet-900' : 'text-slate-900'}`}>{e.specialty}</span>
+                          {rec && <Sparkles size={13} className="text-[#8B4513] shrink-0"/>}
+                          <Stethoscope size={14} className="text-[#8B4513] shrink-0"/>
+                          <span className={`font-semibold text-sm ${rec ? 'text-[#2D5A27]' : 'text-slate-900'}`}>{e.specialty}</span>
                         </div>
                       </td>
                       <td className="px-4 py-3 text-slate-700 text-sm">
@@ -855,20 +855,20 @@ export function MedicalSchedule({
               const rec = inference.hasMatch && !inference.isService && inference.specialties.some(sp =>
                 normalize(e.specialty).includes(normalize(sp)))
               return (
-                <div key={e.id} className={`w-full rounded-xl border p-4 shadow-sm
-                  ${rec ? 'border-violet-300 bg-gradient-to-br from-violet-50/60 to-cyan-50/30' : 'border-slate-200 bg-white'}`}>
+                <div key={e.id} className={`w-full rounded-[24px] border p-4 shadow-[0_12px_28px_rgba(45,90,39,0.12)]
+                  ${rec ? 'border-[#8B4513]/45 bg-gradient-to-br from-[#FAF9F6] to-[#F3ECE6]' : 'border-[#8B4513]/25 bg-[#FAF9F6]'}`}>
                   {rec && (
-                    <div className="flex items-center gap-1.5 mb-3 px-2.5 py-1.5 bg-gradient-to-r from-violet-500 to-cyan-500 rounded-lg w-fit">
+                    <div className="flex items-center gap-1.5 mb-3 px-2.5 py-1.5 bg-gradient-to-r from-[#8B4513] to-[#A15A24] rounded-[14px] w-fit">
                       <Sparkles size={12} className="text-white"/>
                       <span className="text-white text-xs font-bold">Recomendado</span>
                     </div>
                   )}
                   <div className="mb-3 flex items-center gap-2.5">
-                    <div className={`rounded-lg p-2 ${rec ? 'bg-gradient-to-br from-violet-500 to-cyan-500 text-white' : 'bg-blue-50 text-blue-700'}`}>
+                    <div className={`rounded-[14px] p-2 ${rec ? 'bg-gradient-to-br from-[#8B4513] to-[#A15A24] text-white' : 'bg-[#F3ECE6] text-[#8B4513]'}`}>
                       <Stethoscope size={18}/>
                     </div>
                     <div>
-                      <h4 className={`font-bold ${rec ? 'text-violet-900' : 'text-slate-900'}`}>{e.specialty}</h4>
+                      <h4 className={`font-bold ${rec ? 'text-[#2D5A27]' : 'text-slate-900'}`}>{e.specialty}</h4>
                       <p className="text-[11px] font-medium uppercase tracking-wider text-slate-400">Especialidad</p>
                     </div>
                   </div>
@@ -910,15 +910,15 @@ export function MedicalSchedule({
                 normalize(sp).includes(normalize(svc.name))
               )
             return (
-              <div key={svc.name} className={`w-full rounded-xl border p-4 shadow-sm
-                ${rec ? 'border-violet-300 bg-violet-50/30' : 'border-slate-200 bg-white'}`}>
+              <div key={svc.name} className={`w-full rounded-[24px] border p-4 shadow-[0_12px_28px_rgba(45,90,39,0.12)]
+                ${rec ? 'border-[#8B4513]/45 bg-[#F3ECE6]' : 'border-[#8B4513]/25 bg-[#FAF9F6]'}`}>
                 <div className="mb-3 flex items-center gap-3">
-                  {rec && <Sparkles size={14} className="text-violet-500 shrink-0"/>}
-                  <div className={`rounded-lg p-2 ${rec ? 'bg-gradient-to-br from-violet-500 to-cyan-500 text-white' : 'bg-blue-50 text-blue-700'}`}>
+                  {rec && <Sparkles size={14} className="text-[#8B4513] shrink-0"/>}
+                  <div className={`rounded-[14px] p-2 ${rec ? 'bg-gradient-to-br from-[#8B4513] to-[#A15A24] text-white' : 'bg-[#F3ECE6] text-[#8B4513]'}`}>
                     <Icon size={18}/>
                   </div>
-                  <h4 className={`font-bold ${rec ? 'text-violet-900' : 'text-slate-900'}`}>{svc.name}</h4>
-                  {rec && <span className="ml-auto flex items-center gap-1 text-[10px] text-violet-600 font-bold"><ChevronRight size={12}/>Recomendado</span>}
+                  <h4 className={`font-bold ${rec ? 'text-[#2D5A27]' : 'text-slate-900'}`}>{svc.name}</h4>
+                  {rec && <span className="ml-auto flex items-center gap-1 text-[10px] text-[#8B4513] font-bold"><ChevronRight size={12}/>Recomendado</span>}
                 </div>
                 <div className="space-y-2.5 border-t border-slate-100 pt-3">
                   <div className="flex items-center gap-3 text-slate-600">

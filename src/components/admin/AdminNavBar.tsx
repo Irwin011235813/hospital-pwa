@@ -2,9 +2,9 @@ import { LogOut, Cross } from 'lucide-react'
 
 export default function AdminNavBar({ onLogout }: { onLogout: () => void }) {
   return (
-    <nav className="sticky top-0 left-0 right-0 z-40 bg-white border-b border-slate-100 px-4 py-3 flex items-center justify-between shadow-sm">
+    <nav className="sticky top-0 left-0 right-0 z-40 flex items-center justify-between border-b border-[#8B4513]/20 bg-[#FAF9F6] px-4 py-3 shadow-[0_8px_20px_rgba(45,90,39,0.08)]">
       <div className="flex items-center gap-2.5">
-        <div className="w-7 h-7 rounded-lg bg-blue-800 flex items-center justify-center">
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#2D5A27]">
           <Cross size={13} className="text-white" strokeWidth={2.5} />
         </div>
         <div>
@@ -14,7 +14,7 @@ export default function AdminNavBar({ onLogout }: { onLogout: () => void }) {
       </div>
       <button
         onClick={onLogout}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 transition-colors"
+        className="flex items-center gap-1.5 rounded-[14px] px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:bg-[#F1ECE6]"
       >
         <LogOut size={15} /> Salir
       </button>
