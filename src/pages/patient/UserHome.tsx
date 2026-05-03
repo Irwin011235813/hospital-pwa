@@ -11,7 +11,9 @@ import { Swiper, SwiperSlide } from 'swiper/react'
 import { Pagination }          from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/pagination'
-import { LogOut, Smartphone, X, CalendarDays, Megaphone } from 'lucide-react'
+import { LogOut, Smartphone, X, CalendarDays, Megaphone, Phone } from 'lucide-react'
+
+const LOCAL_EMERGENCY_PHONE = '+5493757527038'
 
 // ── Banner PWA ────────────────────────────────────────────────────────────────
 function PWABanner({ onClose }: { onClose: () => void }) {
@@ -171,6 +173,26 @@ export default function UserHome() {
 
         {/* Banner PWA */}
         {showBanner && <PWABanner onClose={closeBanner} />}
+
+        {/* Acceso rápido a emergencias */}
+        <a
+          href={`tel:${LOCAL_EMERGENCY_PHONE}`}
+          aria-label="Llamar a emergencias locales"
+          className="group flex items-center gap-3 rounded-2xl border border-[#8B4513]/30 bg-gradient-to-r from-[#2D5A27] to-[#3A6B34] p-4 text-white shadow-[0_14px_28px_rgba(45,90,39,0.28)] transition-transform active:scale-[0.99]"
+        >
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm">
+            <Phone size={22} className="text-white" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#DCEAD9]">
+              Acceso rapido a emergencias
+            </p>
+            <p className="truncate text-base font-black tracking-wide">+54 9 3757 52-7038</p>
+          </div>
+          <span className="rounded-full border border-white/30 bg-white/15 px-3 py-1 text-[11px] font-bold uppercase tracking-wide">
+            Llamar
+          </span>
+        </a>
 
         {/* Swiper deslizable */}
         <Swiper
