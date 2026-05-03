@@ -174,14 +174,26 @@ export function EmergencyFab() {
             <X size={20} />
           </button>
 
-          <div className="relative z-10 flex min-h-screen flex-col items-center justify-between px-6 py-10 text-center">
-            <div>
+          <div className="relative z-10 flex min-h-screen flex-col items-center justify-between px-6 py-8 text-center">
+            <div className="w-full max-w-sm">
               <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#8B4513]">Emergencia</p>
               <h2 className="mt-2 text-3xl font-black text-[#2D5A27]">MODO RCP ACTIVADO</h2>
-              <p className="mt-2 text-sm text-slate-600">Segui el ritmo de compresiones: {BPM} BPM</p>
+              <p className="mt-2 text-sm text-slate-600">Seguí el ritmo de compresiones: {BPM} BPM</p>
+
+              <div className="mt-3 rounded-[20px] border border-[#2D5A27]/35 bg-[#2D5A27]/10 p-4 text-left font-sans">
+                <p className="text-sm leading-relaxed text-slate-700">
+                  <span className="font-bold text-[#8B4513]">1.</span> Manos en el centro del pecho, una sobre otra.
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-slate-700">
+                  <span className="font-bold text-[#8B4513]">2.</span> Presioná fuerte y rápido sin doblar los codos.
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-slate-700">
+                  <span className="font-bold text-[#8B4513]">3.</span> Hundí el pecho 5 cm y dejá que vuelva a subir.
+                </p>
+              </div>
             </div>
 
-            <div className="relative flex items-center justify-center py-6">
+            <div className="relative flex items-center justify-center py-3">
               <div
                 className={`absolute h-[260px] w-[260px] rounded-full border-4 border-[#8B4513]/35 transition-transform duration-150 ${
                   beatPulse ? 'scale-110' : 'scale-100'
