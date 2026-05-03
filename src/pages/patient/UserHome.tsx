@@ -140,7 +140,7 @@ export default function UserHome() {
     <div className="min-h-screen bg-slate-50 pb-24">
 
       {/* Header */}
-      <header className="bg-gradient-to-r from-[#2D5A27]/18 via-[#E9F1E8] to-[#FAF9F6] border-b border-[#8B4513]/20 px-4 py-3 sticky top-0 z-40">
+      <header className="sticky top-0 z-50 border-b border-[#8B4513]/20 bg-gradient-to-r from-[#DCEAD9] via-[#EEF4EC] to-[#FAF9F6] px-4 py-3 shadow-sm">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             {user?.photoURL ? (
